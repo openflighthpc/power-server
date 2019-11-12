@@ -30,34 +30,51 @@
 require 'json'
 require 'jsonapi-serializers'
 
-class PowerController < Sinatra::Base
-  configure do
-    mime_type :api_json, 'application/vnd.api+json'
-  end
+module HasPowerRoutes
+  extend ActiveSupport::Concern
 
-  helpers do
-    def serialize_model(model, options = {})
-      options[:is_collection] = false
-      options[:skip_collection_check] = true
-      JSONAPI::Serializer.serialize(model, options)
-    end
-
-    def serialize_models(models, options = {})
-      options[:is_collection] = true
-      JSONAPI::Serializer.serialize(models, options)
-    end
-
-    def load_nodes
+  class_methods do
+    def path
       raise NotImplementedError
     end
   end
 
-  before do
-    content_type :api_json
+  included do
+    configure do
+      mime_type :api_json, 'application/vnd.api+json'
+    end
+
+    helpers do
+      def serialize_model(model, options = {})
+        options[:is_collection] = false
+        options[:skip_collection_check] = true
+        JSONAPI::Serializer.serialize(model, options)
+      end
+
+      def serialize_models(models, options = {})
+        options[:is_collection] = true
+        JSONAPI::Serializer.serialize(models, options)
+      end
+
+      def load_nodes
+        raise NotImplementedError
+      end
+    end
+
+    before do
+      content_type :api_json
+    end
+
+    get(path) { 'Hello World' }
   end
 end
 
-class NodeController < PowerController
-  get('') { 'Hello World' }
+class NodeController < Sinatra::Base
+  def self.path
+    "/:keys"
+  end
+
+  # Must be included AFTER path has been defined
+  include HasPowerRoutes
 end
 

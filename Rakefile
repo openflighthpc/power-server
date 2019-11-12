@@ -27,25 +27,46 @@
 # https://github.com/openflighthpc/metal-server
 #===============================================================================
 
-source "https://rubygems.org"
+task :require_bundler do
+  $: << __dir__
+  $: << File.join(__dir__, 'lib')
+  ENV['BUNDLE_GEMFILE'] ||= File.join(__dir__, 'Gemfile')
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+  require 'rubygems'
+  require 'bundler'
 
-gem 'activesupport'
-gem 'figaro'
-gem 'jwt'
-gem 'rake'
-gem 'sinatra'
-gem 'jsonapi-serializers'
+  raise <<~ERROR.chomp unless ENV['RACK_ENV']
+    Can not require the application because the RACK_ENV has not been set.
+    Please export the env to your enviroment and try again:
 
-group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
+    export RACK_ENV=production
+  ERROR
+
+  Bundler.require(:default, ENV['RACK_ENV'].to_sym)
+
+  # Turns FakeFS off if running in test mode. The gem isn't installed in production
+  FakeFS.deactivate! if ENV['RACK_ENV'] == 'test'
 end
 
-group :test do
-	gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
+task require: :require_bundler do
+  require 'config/initializers/active_support'
+  require 'config/initializers/figaro'
+  require 'app/models'
+  require 'app/serializers'
+  require 'app/controllers'
+end
+
+task console: :require do
+  binding.pry
+end
+
+task 'token:admin' => :require do
+  # puts User.new(admin: true).generate_jwt
+  raise NotImplementedError
+end
+
+task 'token:user' => :require do
+  # puts User.new(user: true).generate_jwt
+  raise NotImplementedError
 end
 

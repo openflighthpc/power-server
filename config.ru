@@ -27,25 +27,9 @@
 # https://github.com/openflighthpc/metal-server
 #===============================================================================
 
-source "https://rubygems.org"
+require 'rake'
+load File.expand_path(File.join(__dir__, 'Rakefile'))
+Rake::Task[:require].invoke
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem 'activesupport'
-gem 'figaro'
-gem 'jwt'
-gem 'rake'
-gem 'sinatra'
-gem 'jsonapi-serializers'
-
-group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
-end
-
-group :test do
-	gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-end
+map('/nodes') { run NodeController }
 

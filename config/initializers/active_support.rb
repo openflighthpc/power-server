@@ -27,25 +27,7 @@
 # https://github.com/openflighthpc/metal-server
 #===============================================================================
 
-source "https://rubygems.org"
-
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem 'activesupport'
-gem 'figaro'
-gem 'jwt'
-gem 'rake'
-gem 'sinatra'
-gem 'jsonapi-serializers'
-
-group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
-end
-
-group :test do
-	gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-end
+require 'active_support/concern'
+require 'active_support/core_ext/numeric/time'
+require 'active_support/core_ext/string'
 

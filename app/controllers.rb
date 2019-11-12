@@ -27,25 +27,37 @@
 # https://github.com/openflighthpc/metal-server
 #===============================================================================
 
-source "https://rubygems.org"
+require 'json'
+require 'jsonapi-serializers'
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+class PowerController < Sinatra::Base
+  configure do
+    mime_type :api_json, 'application/vnd.api+json'
+  end
 
-gem 'activesupport'
-gem 'figaro'
-gem 'jwt'
-gem 'rake'
-gem 'sinatra'
-gem 'jsonapi-serializers'
+  helpers do
+    def serialize_model(model, options = {})
+      options[:is_collection] = false
+      options[:skip_collection_check] = true
+      JSONAPI::Serializer.serialize(model, options)
+    end
 
-group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
+    def serialize_models(models, options = {})
+      options[:is_collection] = true
+      JSONAPI::Serializer.serialize(models, options)
+    end
+
+    def load_nodes
+      raise NotImplementedError
+    end
+  end
+
+  before do
+    content_type :api_json
+  end
 end
 
-group :test do
-	gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
+class NodeController < PowerController
+  get('') { 'Hello World' }
 end
 

@@ -27,25 +27,23 @@
 # https://github.com/openflighthpc/metal-server
 #===============================================================================
 
-source "https://rubygems.org"
+require 'figaro'
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+# Loads the configurations into the environment
+Figaro.application = Figaro::Application.new(
+  environment: (ENV['RACK_ENV'] || 'development').to_sym,
+  path: File.expand_path('../application.yaml', __dir__)
+)
+Figaro.load
+      .reject { |_, v| v.nil? }
+      .each { |key, value| ENV[key] ||= value }
 
-gem 'activesupport'
-gem 'figaro'
-gem 'jwt'
-gem 'rake'
-gem 'sinatra'
-gem 'jsonapi-serializers'
+# Hard sets the app's root directory to the current code base
+ENV['app_root_dir'] = File.expand_path('../..', __dir__)
+root_dir = ENV['app_root_dir']
 
-group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
-end
+# Sets relative defaults to the install location
+ENV['content_dir']  ||= File.join(root_dir, 'var')
+ENV['log_dir']      ||= File.join(root_dir, 'log')
 
-group :test do
-	gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
-end
 

@@ -65,9 +65,9 @@ module HasPowerRoutes
       # content_type :api_json
     end
 
-    get(path)     { Command.new(:status, nodes.first).cmd }
-    patch(path)   { Command.new(:power_on, nodes.first).cmd }
-    delete(path)  { Command.new(:power_off, nodes.first).cmd }
+    get(path)     { commands(:status).map(&:cmd) }
+    patch(path)   { commands(:power_on).map(&:cmd) }
+    delete(path)  { commands(:power_off).map(&:cmd) }
   end
 
   def node_names
@@ -76,6 +76,10 @@ module HasPowerRoutes
 
   def nodes
     node_names.map { |n| topology.nodes[n] }.reject(&:nil?)
+  end
+
+  def commands(action)
+    nodes.map { |n| Command.new(action, n) }
   end
 end
 

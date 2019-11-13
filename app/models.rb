@@ -54,9 +54,9 @@ class Topology < Hashie::Trash
   property  :nodes, required: true, coerce: Hash[Symbol => Hash],
             transform_with: ->(node_hashes) do
               node_hashes.each_with_object(Hashie::Mash.new) do |(name, attr), memo|
-                memo[id] = Node.new name: name,
-                                    platform: attr.delete(:platform),
-                                    attributes: attr.merge(name: name)
+                memo[name] = Node.new name: name,
+                                      platform: attr.delete(:platform),
+                                      attributes: attr.merge(name: name)
               end
             end
 

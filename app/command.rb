@@ -27,47 +27,29 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-task :require_bundler do
-  $: << __dir__
-  $: << File.join(__dir__, 'lib')
-  ENV['BUNDLE_GEMFILE'] ||= File.join(__dir__, 'Gemfile')
+require 'open3'
+require 'memoist'
 
-  require 'rubygems'
-  require 'bundler'
+Command = Struct.new(:action, :node) do
+  extend Memoist
 
-  raise <<~ERROR.chomp unless ENV['RACK_ENV']
-    Can not require the application because the RACK_ENV has not been set.
-    Please export the env to your enviroment and try again:
+  def cmd
+    args = platform.variables
+                   .map { |v| "#{v}=\"#{node.attributes[v]}\"" }
+                   .join("\n")
+    <<~CMD
+      # Configuration Parameters For: #{node.name}
+      #{args}
 
-    export RACK_ENV=production
-  ERROR
+      # Command For: #{node.platform}##{action}
+      #{platform[action]}
+    CMD
+  end
+  memoize :cmd
 
-  Bundler.require(:default, ENV['RACK_ENV'].to_sym)
-
-  # Turns FakeFS off if running in test mode. The gem isn't installed in production
-  FakeFS.deactivate! if ENV['RACK_ENV'] == 'test'
-end
-
-task require: :require_bundler do
-  require 'config/initializers/active_support'
-  require 'config/initializers/figaro'
-  require 'app/command'
-  require 'app/models'
-  require 'app/serializers'
-  require 'app/controllers'
-end
-
-task console: :require do
-  binding.pry
-end
-
-task 'token:admin' => :require do
-  # puts User.new(admin: true).generate_jwt
-  raise NotImplementedError
-end
-
-task 'token:user' => :require do
-  # puts User.new(user: true).generate_jwt
-  raise NotImplementedError
+  def platform
+    Topology::Cache.platforms[node.platform]
+  end
+  memoize :platform
 end
 

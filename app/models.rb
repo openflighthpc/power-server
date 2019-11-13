@@ -54,7 +54,7 @@ class Topology < Hashie::Trash
   property  :nodes, required: true, coerce: Hash[Symbol => Hash],
             transform_with: ->(node_hashes) do
               node_hashes.each_with_object(Hashie::Mash.new) do |(id, attr), memo|
-                memo[id] = Node.new id: id,
+                memo[id] = Node.new name: id,
                                     platform: attr.delete(:platform),
                                     attributes: attr
               end
@@ -72,7 +72,7 @@ end
 class Node < Hashie::Dash
   include Hashie::Extensions::Dash::Coercion
 
-  property :id,         required: true
+  property :name,       required: true
   property :platform,   required: true
   property :attributes, required: true, coerce: Hashie::Mash
 end

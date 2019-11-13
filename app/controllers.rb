@@ -62,10 +62,12 @@ module HasPowerRoutes
     end
 
     before do
-      content_type :api_json
+      # content_type :api_json
     end
 
-    get(path) { binding.pry }
+    get(path)     { Command.new(:status, nodes.first).cmd }
+    patch(path)   { Command.new(:power_on, nodes.first).cmd }
+    delete(path)  { Command.new(:power_off, nodes.first).cmd }
   end
 
   def node_names

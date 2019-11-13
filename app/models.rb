@@ -86,5 +86,6 @@ class Platform < Hashie::Dash
   property  :power_off
   property  :reboot
   property  :status
+  property  :status_off_exit_code,  default: 255
 end
 

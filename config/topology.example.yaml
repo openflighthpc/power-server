@@ -76,6 +76,7 @@ platforms:
     variables: [ec2_id, region]
     power_on: aws ec2 start-instances --instance-ids "$ec2_id" --region "$region"
     power_off: aws ec2 stop-instances --instance-ids "$ec2_id" --region "$region"
+    status_off_exit_code: 123 # Default: 255
     status: |-
       set -e
       res=$(aws ec2 describe-instances --instance-ids "$ec2_id" --region "$region")
@@ -85,7 +86,7 @@ platforms:
           exit 0
           ;;
         stopped)
-          exit 100
+          exit 123
           ;;
         *)
           exit 1

@@ -43,7 +43,5 @@ ENV['app_root_dir'] = File.expand_path('../..', __dir__)
 root_dir = ENV['app_root_dir']
 
 # Sets relative defaults to the install location
-ENV['content_dir']  ||= File.join(root_dir, 'var')
-ENV['log_dir']      ||= File.join(root_dir, 'log')
-
+ENV['topology_config']  ||= File.join(root_dir, 'config/topology.yaml')
 

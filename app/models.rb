@@ -29,7 +29,7 @@
 
 require 'hashie'
 
-class Topography < Hashie::Trash
+class Topology < Hashie::Trash
   include Hashie::Extensions::IgnoreUndeclared
   include Hashie::Extensions::Coercion
 

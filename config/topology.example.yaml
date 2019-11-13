@@ -1,0 +1,92 @@
+# frozen_string_literal: true
+
+#==============================================================================
+# Copyright (C) 2019-present Alces Flight Ltd.
+#
+# This file is part of Power Server.
+#
+# This program and the accompanying materials are made available under
+# the terms of the Eclipse Public License 2.0 which is available at
+# <https://www.eclipse.org/legal/epl-2.0>, or alternative license
+# terms made available by Alces Flight Ltd - please direct inquiries
+# about licensing to licensing@alces-flight.com.
+#
+# Power Server is distributed in the hope that it will be useful, but
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR
+# IMPLIED INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OR CONDITIONS
+# OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY OR FITNESS FOR A
+# PARTICULAR PURPOSE. See the Eclipse Public License 2.0 for more
+# details.
+#
+# You should have received a copy of the Eclipse Public License 2.0
+# along with Flight Cloud. If not, see:
+#
+#  https://opensource.org/licenses/EPL-2.0
+#
+# For more information on Power Server, please visit:
+# https://github.com/openflighthpc/power-server
+#===============================================================================
+
+# Create a basic 5 node, 5 gpu cluster
+nodes:
+  node01:
+    platform: aws
+    ec2_id: i-node01xxxxxxxxxxx
+    region: eu-west-1
+  node02:
+    platform: aws
+    ec2_id: i-node02xxxxxxxxxxx
+    region: eu-west-1
+  node03:
+    platform: aws
+    ec2_id: i-node03xxxxxxxxxxx
+    region: eu-west-1
+  node04:
+    platform: aws
+    ec2_id: i-node04xxxxxxxxxxx
+    region: eu-west-1
+  node05:
+    platform: aws
+    ec2_id: i-node05xxxxxxxxxxx
+    region: eu-west-1
+  gpu01:
+    platform: aws
+    ec2_id: i-gpu01xxxxxxxxxxxx
+    region: eu-west-1
+  gpu02:
+    platform: aws
+    ec2_id: i-gpu02xxxxxxxxxxxx
+    region: eu-west-1
+  gpu03:
+    platform: aws
+    ec2_id: i-gpu03xxxxxxxxxxxx
+    region: eu-west-1
+  gpu04:
+    platform: aws
+    ec2_id: i-gpu04xxxxxxxxxxxx
+    region: eu-west-1
+  gpu05:
+    platform: aws
+    ec2_id: i-gpu05xxxxxxxxxxxx
+    region: eu-west-1
+
+# Define the platforms her
+platforms:
+  aws:
+    variables: [ec2_id, region]
+    power_on: aws ec2 start-instances --instance-ids "$ec2_id" --region "$region"
+    power_off: aws ec2 stop-instances --instance-ids "$ec2_id" --region "$region"
+    status: |-
+      set -e
+      res=$(aws ec2 describe-instances --instance-ids "$ec2_id" --region "$region")
+      status=$(echo $res | jq '.["Reservations"][0]["Instances"][0]["State"]["Name"]')
+      case "$status" in
+        running)
+          exit 0
+          ;;
+        stopped)
+          exit 100
+          ;;
+        *)
+          exit 1
+      esac

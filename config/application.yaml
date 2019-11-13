@@ -19,12 +19,12 @@
 # app_base_url:       # [REQUIRED]
 
 # DYNAMIC DEFAULTS:
-# The following have defaults relative to where the application has been installed
-# topology_config:  <install-dir>/config/topology.yaml
+# The following may use relative paths from the install directory
+# or hard coded to be an absolute path
+topology_config:  config/topology.yaml
 
 # STATIC DEFAULTS:
 
-# DEVELOPERS ONLY:
-test:
-  jwt_shared_secret:        SOME_TEST_TOKEN
+development:
+  topology_config: config/topology.example.yaml
 

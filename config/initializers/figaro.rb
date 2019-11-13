@@ -42,6 +42,10 @@ Figaro.load
 ENV['app_root_dir'] = File.expand_path('../..', __dir__)
 root_dir = ENV['app_root_dir']
 
-# Sets relative defaults to the install location
-ENV['topology_config']  ||= File.join(root_dir, 'config/topology.yaml')
+relative_keys = ['topology_config']
+Figaro.require_keys(*relative_keys)
+
+# Sets relative keys from the install directory
+# NOTE: Does not affect the path if it is already absolute
+relative_keys.each { |k| ENV[k] = File.absolute_path(ENV[k], root_dir) }
 

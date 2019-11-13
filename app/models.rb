@@ -29,13 +29,17 @@
 
 require 'hashie'
 
+class SymbolizedMash < ::Hashie::Mash
+  include Hashie::Extensions::Mash::SymbolizeKeys
+end
+
 class Topology < Hashie::Trash
   module Cache
     class << self
       delegate_missing_to :cache
 
       def cache
-        @cache ||= Topology.new(YAML.load_file(path))
+        @cache ||= Topology.new(SymbolizedMash.load(path))
       end
 
       def path
@@ -60,7 +64,7 @@ class Topology < Hashie::Trash
   property  :platforms, required: true, coerce: Hash[Symbol => Hash],
             transform_with: ->(plat_hashes) do
               plat_hashes.each_with_object(Hashie::Mash.new) do |(name, attr), memo|
-                memo[id] = Platform.new(name: name, **attr)
+                memo[name] = Platform.new(name: name, **attr)
               end
             end
 end
@@ -76,10 +80,11 @@ end
 class Platform < Hashie::Dash
   include Hashie::Extensions::Dash::Coercion
 
-  property  :name,    required: true
-  property  :on,      required: true
-  property  :off,     required: true
-  property  :reboot,  required: true
-  property  :status,  required: true
+  property  :name,      required: true
+  property  :variables, default: []
+  property  :power_on
+  property  :power_off
+  property  :reboot
+  property  :status
 end
 

@@ -31,6 +31,18 @@ require 'rake'
 load File.expand_path(File.join(__dir__, 'Rakefile'))
 Rake::Task[:require].invoke
 
-map('/nodes') { run NodeController }
+# Insures topology has been loaded
+begin
+  Topology::Cache.cache
+rescue => e
+  $stderr.puts <<~ERROR.chomp
+    Failed to start the server as the topology could not be loaded:
 
+    Topology Config: #{Topology::Cache.path}
+    Error: #{e.message}
+  ERROR
+  exit 1
+end
+
+map('/nodes') { run NodeController }
 

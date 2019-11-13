@@ -30,4 +30,5 @@
 require 'active_support/concern'
 require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/string'
+require 'active_support/core_ext/module/delegation'
 

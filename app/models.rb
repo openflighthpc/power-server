@@ -30,6 +30,20 @@
 require 'hashie'
 
 class Topology < Hashie::Trash
+  module Cache
+    class << self
+      delegate_missing_to :cache
+
+      def cache
+        @cache ||= Topology.new(YAML.load_file(path))
+      end
+
+      def path
+        Figaro.env.topology_config
+      end
+    end
+  end
+
   include Hashie::Extensions::IgnoreUndeclared
   include Hashie::Extensions::Dash::Coercion
 

@@ -45,6 +45,10 @@ module HasPowerRoutes
     end
 
     helpers do
+      def topology
+        Topology::Cache
+      end
+
       def serialize_model(model, options = {})
         options[:is_collection] = false
         options[:skip_collection_check] = true
@@ -61,7 +65,7 @@ module HasPowerRoutes
       content_type :api_json
     end
 
-    get(path) { node_names }
+    get(path) { binding.pry }
   end
 
   def node_names
@@ -69,6 +73,7 @@ module HasPowerRoutes
   end
 
   def nodes
+    node_names.map { |n| topology.nodes[n] }.reject(&:nil?)
   end
 end
 

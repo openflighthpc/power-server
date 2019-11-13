@@ -31,32 +31,33 @@ require 'hashie'
 
 class Topology < Hashie::Trash
   include Hashie::Extensions::IgnoreUndeclared
-  include Hashie::Extensions::Coercion
+  include Hashie::Extensions::Dash::Coercion
 
   # Converts the nodes hash into Node objects
-  property :nodes, required: true, transform_with: ->(node_hashes) do
-    node_hashes.each_with_object(Hashie::Mash.new) do |(id, attr), memo|
-      memo[id] = Node.new(id: id, **attr)
-    end
-  end
-  coerce_key :nodes, Hash[Symbol => Hash]
+  property  :nodes, required: true, coerce: Hash[Symbol => Hash],
+            transform_with: ->(node_hashes) do
+              node_hashes.each_with_object(Hashie::Mash.new) do |(id, attr), memo|
+                memo[id] = Node.new id: id,
+                                    platform: attr.delete(:platform),
+                                    attributes: attr
+              end
+            end
 
   # Converts the platform hash into Platform Objects
-  property :platforms, required: true, transform_with: ->(plat_hashes) do
-    plat_hashes.each_with_object(Hashie::Mash.new) do |(name, attr), memo|
-      memo[id] = Platform.new(name: name, **attr)
-    end
-  end
-  coerce_key :Platform, Hash[Symbol => Hash]
+  property  :platforms, required: true, coerce: Hash[Symbol => Hash],
+            transform_with: ->(plat_hashes) do
+              plat_hashes.each_with_object(Hashie::Mash.new) do |(name, attr), memo|
+                memo[id] = Platform.new(name: name, **attr)
+              end
+            end
 end
 
-class Node < Hashie::Mash
-  def initialize(*_)
-    super
-    raise ArgumentError, <<~ERROR unless id?
-      The property 'id' is required for #{self.class}
-    ERROR
-  end
+class Node < Hashie::Dash
+  include Hashie::Extensions::Dash::Coercion
+
+  property :id,         required: true
+  property :platform,   required: true
+  property :attributes, required: true, coerce: Hashie::Mash
 end
 
 class Platform < Hashie::Dash

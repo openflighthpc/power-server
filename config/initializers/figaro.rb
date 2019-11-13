@@ -24,7 +24,7 @@
 #  https://opensource.org/licenses/EPL-2.0
 #
 # For more information on Power Server, please visit:
-# https://github.com/openflighthpc/metal-server
+# https://github.com/openflighthpc/power-server
 #===============================================================================
 
 require 'figaro'

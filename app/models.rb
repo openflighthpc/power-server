@@ -24,7 +24,7 @@
 #  https://opensource.org/licenses/EPL-2.0
 #
 # For more information on Power Server, please visit:
-# https://github.com/openflighthpc/metal-server
+# https://github.com/openflighthpc/power-server
 #===============================================================================
 
 require 'hashie'
@@ -44,7 +44,6 @@ class Topology < Hashie::Trash
     end
   end
 
-  include Hashie::Extensions::IgnoreUndeclared
   include Hashie::Extensions::Dash::Coercion
 
   # Converts the nodes hash into Node objects
@@ -75,7 +74,7 @@ class Node < Hashie::Dash
 end
 
 class Platform < Hashie::Dash
-  include Hashie::Extensions::IgnoreUndeclared
+  include Hashie::Extensions::Dash::Coercion
 
   property  :name,    required: true
   property  :on,      required: true

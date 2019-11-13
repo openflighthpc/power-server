@@ -33,6 +33,7 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 
 gem 'activesupport'
 gem 'figaro'
+gem 'hashie'
 gem 'jwt'
 gem 'rake'
 gem 'sinatra'

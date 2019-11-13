@@ -55,23 +55,30 @@ module HasPowerRoutes
         options[:is_collection] = true
         JSONAPI::Serializer.serialize(models, options)
       end
-
-      def load_nodes
-        raise NotImplementedError
-      end
     end
 
     before do
       content_type :api_json
     end
 
-    get(path) { 'Hello World' }
+    get(path) { node_names }
+  end
+
+  def node_names
+    raise NotImplementedError
+  end
+
+  def nodes
   end
 end
 
 class NodeController < Sinatra::Base
   def self.path
-    "/:keys"
+    /\/(?<nodeattr_str>[[:alnum:]]+)/
+  end
+
+  def node_names
+    [params['nodeattr_str']]
   end
 
   # Must be included AFTER path has been defined

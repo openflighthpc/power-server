@@ -50,25 +50,20 @@ nodes:
     ec2_id: i-node05xxxxxxxxxxx
     region: eu-west-1
   gpu01:
-    platform: aws
-    ec2_id: i-gpu01xxxxxxxxxxxx
-    region: eu-west-1
+    platform: azure
+    resource_group: demo-power-group
   gpu02:
-    platform: aws
-    ec2_id: i-gpu02xxxxxxxxxxxx
-    region: eu-west-1
+    platform: azure
+    resource_group: demo-power-group
   gpu03:
-    platform: aws
-    ec2_id: i-gpu03xxxxxxxxxxxx
-    region: eu-west-1
+    platform: azure
+    resource_group: demo-power-group
   gpu04:
-    platform: aws
-    ec2_id: i-gpu04xxxxxxxxxxxx
-    region: eu-west-1
+    platform: azure
+    resource_group: demo-power-group
   gpu05:
-    platform: aws
-    ec2_id: i-gpu05xxxxxxxxxxxx
-    region: eu-west-1
+    platform: azure
+    resource_group: demo-power-group
 
 # Define the platforms her
 platforms:
@@ -90,4 +85,27 @@ platforms:
           ;;
         *)
           exit 1
+          ;;
       esac
+
+  azure:
+    variables: [resource_group, name]
+    power_on: az vm start --resource_group "$resource_group" --name "$name"
+    power_off: az vm stop --resource_group "$resource_group" --name "$name"
+    # status_off_exit_code: 255
+    status: |-
+      set -e
+      status=$(az vm get-instance-view --resource-group "$resource_group" \
+                                       --name "$name" \
+                                       --query instanceView.statuses[1].code)
+      case "$status" in
+        PowerState/running)
+          exit 0
+          ;;
+        PowerState/stopped)
+          exit 255
+        *)
+          exit 1
+          ;;
+      esac
+

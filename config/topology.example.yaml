@@ -94,8 +94,8 @@ platforms:
 
   azure:
     variables: [resource_group, name]
-    power_on: az vm start --resource_group "$resource_group" --name "$name"
-    power_off: az vm stop --resource_group "$resource_group" --name "$name"
+    power_on: az vm start --resource-group "$resource_group" --name "$name"
+    power_off: az vm stop --resource-group "$resource_group" --name "$name"
     # status_off_exit_code: 255
     status: |-
       set -e
@@ -103,11 +103,12 @@ platforms:
                                        --name "$name" \
                                        --query instanceView.statuses[1].code)
       case "$status" in
-        PowerState/running)
+        \"PowerState/running\")
           exit 0
           ;;
-        PowerState/stopped)
+        \"PowerState/stopped\")
           exit 255
+          ;;
         *)
           exit 1
           ;;

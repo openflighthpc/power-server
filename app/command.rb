@@ -33,6 +33,10 @@ require 'memoist'
 Command = Struct.new(:action, :node) do
   extend Memoist
 
+  def id
+    node.name.to_s
+  end
+
   def cmd
     args = platform.variables
                    .map { |v| "#{v}=\"#{node.attributes[v]}\"" }
@@ -51,5 +55,18 @@ Command = Struct.new(:action, :node) do
     Topology::Cache.platforms[node.platform]
   end
   memoize :platform
+
+  def capture2e
+    Open3.capture2e(cmd)
+  end
+  memoize :capture2e
+
+  def exit_code
+    capture2e.last.to_i
+  end
+
+  def stdout_and_stderr
+    capture2e.first
+  end
 end
 

@@ -65,9 +65,9 @@ module HasPowerRoutes
       # content_type :api_json
     end
 
-    get(path)     { commands(:status).map(&:cmd) }
-    patch(path)   { commands(:power_on).map(&:cmd) }
-    delete(path)  { commands(:power_off).map(&:cmd) }
+    get(path)     { serialize_models(commands(:status)).to_json }
+    patch(path)   { serialize_models(commands(:power_on)).to_json }
+    delete(path)  { serialize_models(commands(:power_off)).to_json }
   end
 
   def node_names

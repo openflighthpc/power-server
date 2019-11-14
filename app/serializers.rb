@@ -45,8 +45,8 @@ class StatusCommandSerializer < BaseCommandSerializer
   end
 
   attribute(:running) do
-    return true if object.exit_code == 0
-    return false if object.exit_code == object.platform.status_off_exit_code
+    next true if object.exit_code == 0
+    next false if object.exit_code == object.platform.status_off_exit_code
   end
 end
 

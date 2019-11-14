@@ -77,14 +77,14 @@ platforms:
     power_off: aws ec2 stop-instances --instance-ids "$ec2_id" --region "$region"
     status_off_exit_code: 123 # Default: 255
     status: |-
-      set -e
-      res=$(aws ec2 describe-instances --instance-ids "$ec2_id" --region "$region")
-      status=$(echo $res | jq '.["Reservations"][0]["Instances"][0]["State"]["Name"]')
+      status=$(aws ec2 describe-instances --instance-ids "$ec2_id" \
+                                          --region "$region" \
+                                          --query Reservations[0].Instances[0].State.Name)
       case "$status" in
-        running)
+        \"running\")
           exit 0
           ;;
-        stopped)
+        \"stopped\")
           exit 123
           ;;
         *)

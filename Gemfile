@@ -38,6 +38,7 @@ gem 'memoist'
 gem 'jwt'
 gem 'rake'
 gem 'sinatra'
+gem 'sinatra-contrib'
 gem 'jsonapi-serializers'
 
 group :development, :test do

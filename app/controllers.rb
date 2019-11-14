@@ -29,6 +29,7 @@
 
 require 'json'
 require 'jsonapi-serializers'
+require "sinatra/json"
 
 module HasPowerRoutes
   extend ActiveSupport::Concern
@@ -40,15 +41,7 @@ module HasPowerRoutes
   end
 
   included do
-    configure do
-      mime_type :api_json, 'application/vnd.api+json'
-    end
-
     helpers do
-      def topology
-        Topology::Cache
-      end
-
       def serialize_models(models, options = {})
         options[:is_collection] = true
         JSONAPI::Serializer.serialize(models, options).tap do |result|
@@ -57,13 +50,9 @@ module HasPowerRoutes
       end
     end
 
-    before do
-      # content_type :api_json
-    end
-
-    get(path)     { serialize_models(commands(:status)).to_json }
-    patch(path)   { serialize_models(commands(:power_on)).to_json }
-    delete(path)  { serialize_models(commands(:power_off)).to_json }
+    get(path)     { json serialize_models(commands(:status)) }
+    patch(path)   { json serialize_models(commands(:power_on)) }
+    delete(path)  { json serialize_models(commands(:power_off)) }
   end
 
   def node_names
@@ -71,7 +60,7 @@ module HasPowerRoutes
   end
 
   def nodes
-    node_names.map { |n| topology.nodes[n] }.reject(&:nil?)
+    node_names.map { |n| Topology::Cache.nodes[n] }.reject(&:nil?)
   end
 
   def commands(action)

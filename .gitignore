@@ -12,6 +12,7 @@
 /var
 /log
 /vendor
+/config/topology.yaml
 
 # Used by dotenv library to load environment variables.
 # .env

@@ -27,15 +27,9 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-class ApplicationSerializer
+class BaseCommandSerializer
   include JSONAPI::Serializer
 
-  def base_url
-    Figaro.env.app_base_url
-  end
-end
-
-class BaseCommandSerializer < ApplicationSerializer
   attributes :action
   attribute(:node_name) { object.id }
   attribute(:platform) { object.node.platform }

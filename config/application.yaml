@@ -16,7 +16,6 @@
 
 # REQUIRED:
 # jwt_shared_secret:  # [REQUIRED]
-# app_base_url:       # [REQUIRED]
 
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory

@@ -49,15 +49,11 @@ module HasPowerRoutes
         Topology::Cache
       end
 
-      def serialize_model(model, options = {})
-        options[:is_collection] = false
-        options[:skip_collection_check] = true
-        JSONAPI::Serializer.serialize(model, options)
-      end
-
       def serialize_models(models, options = {})
         options[:is_collection] = true
-        JSONAPI::Serializer.serialize(models, options)
+        JSONAPI::Serializer.serialize(models, options).tap do |result|
+          result['data'].each { |model| model.delete('links') }
+        end
       end
     end
 

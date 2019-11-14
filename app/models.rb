@@ -84,15 +84,8 @@ class Node < Hashie::Dash
 end
 
 class Platforms < Hashie::Mash
-  MISSING_PLATFORM = {
-    power_on: 'exit 1',
-    power_off: 'exit 1',
-    status: 'exit 1'
-  }.freeze
-
   def initialize(**platform_hash)
-    platforms = platform_hash.merge(missing: MISSING_PLATFORM)
-                             .map do |name, attr|
+    platforms = platform_hash.merge(missing: {}).map do |name, attr|
       [name, Platform.new(name: name, **attr)]
     end
     super(platforms.to_h)
@@ -108,10 +101,10 @@ class Platform < Hashie::Dash
 
   property  :name,      required: true
   property  :variables, default: []
-  property  :power_on
-  property  :power_off
-  property  :reboot
-  property  :status
+  property  :power_on,  default: 'exit 1'
+  property  :power_off, default: 'exit 1'
+  property  :reboot,    default: 'exit 1'
+  property  :status,    default: 'exit 1'
   property  :status_off_exit_code,  default: 255
 end
 

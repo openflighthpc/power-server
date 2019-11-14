@@ -86,7 +86,7 @@ Command = Struct.new(:action, :node) do
   memoize :capture2e
 
   def exit_code
-    capture2e.last.to_i
+    capture2e.last.exitstatus
   end
 
   def stdout_and_stderr

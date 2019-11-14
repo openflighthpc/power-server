@@ -69,12 +69,15 @@ nodes:
   badnode:
     platform: missing_platform
 
-# Define the platforms her
+# Define the platforms here
 platforms:
   aws:
     variables: [ec2_id, region]
     power_on: aws ec2 start-instances --instance-ids "$ec2_id" --region "$region"
     power_off: aws ec2 stop-instances --instance-ids "$ec2_id" --region "$region"
+    # The status command must return 0 for "on". This example then overrides the default "off"
+    # exit code from 255 to 123. This is for demonstration purposes ONLY and is not strictly
+    # required for AWS.
     status_off_exit_code: 123 # Default: 255
     status: |-
       status=$(aws ec2 describe-instances --instance-ids "$ec2_id" \
@@ -85,7 +88,7 @@ platforms:
           exit 0
           ;;
         \"stopped\")
-          exit 123
+          exit 123 # Change this to 255 if 'status_off_exit_code' hasn't been set
           ;;
         *)
           exit 1

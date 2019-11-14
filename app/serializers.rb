@@ -32,7 +32,7 @@ class BaseCommandSerializer
 
   attributes :action
   attribute(:node_name) { object.id }
-  attribute(:platform) { object.node.platform }
+  attribute(:platform) { object.platform.name }
 end
 
 class CommandSerializer < BaseCommandSerializer

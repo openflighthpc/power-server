@@ -60,7 +60,7 @@ module HasPowerRoutes
   end
 
   def nodes
-    node_names.map { |n| Topology::Cache.nodes[n] }.reject(&:nil?)
+    node_names.map { |n| Topology::Cache.nodes[n] }
   end
 
   def commands(action)

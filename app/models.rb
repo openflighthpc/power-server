@@ -52,29 +52,55 @@ class Topology < Hashie::Trash
 
   # Converts the nodes hash into Node objects
   property  :nodes, required: true, coerce: Hash[Symbol => Hash],
-            transform_with: ->(node_hashes) do
-              node_hashes.each_with_object(Hashie::Mash.new) do |(name, attr), memo|
-                memo[name] = Node.new name: name,
-                                      platform: attr.delete(:platform),
-                                      attributes: attr.merge(name: name)
-              end
-            end
+            transform_with: ->(h) { Nodes.new(h) }
 
   # Converts the platform hash into Platform Objects
   property  :platforms, required: true, coerce: Hash[Symbol => Hash],
-            transform_with: ->(plat_hashes) do
-              plat_hashes.each_with_object(Hashie::Mash.new) do |(name, attr), memo|
-                memo[name] = Platform.new(name: name, **attr)
-              end
-            end
+            transform_with: ->(h) { Platforms.new(h) }
+end
+
+class Nodes < Hashie::Mash
+  def initialize(**node_hash)
+    nodes = node_hash.map do |name, attr|
+      node = Node.new name: name,
+                      platform: attr.delete(:platform),
+                      attributes: attr.merge(name: name)
+      [name, node]
+    end
+    super(nodes.to_h)
+  end
+
+  def [](key)
+    super(key) || Node.new(name: key, attributes: { name: key })
+  end
 end
 
 class Node < Hashie::Dash
   include Hashie::Extensions::Dash::Coercion
 
   property :name,       required: true
-  property :platform,   required: true
+  property :platform,   default: :missing
   property :attributes, required: true, coerce: Hashie::Mash
+end
+
+class Platforms < Hashie::Mash
+  MISSING_PLATFORM = {
+    power_on: 'exit 1',
+    power_off: 'exit 1',
+    status: 'exit 1'
+  }.freeze
+
+  def initialize(**platform_hash)
+    platforms = platform_hash.merge(missing: MISSING_PLATFORM)
+                             .map do |name, attr|
+      [name, Platform.new(name: name, **attr)]
+    end
+    super(platforms.to_h)
+  end
+
+  def [](key)
+    super(key) || super(:missing)
+  end
 end
 
 class Platform < Hashie::Dash

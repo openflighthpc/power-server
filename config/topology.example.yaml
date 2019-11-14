@@ -64,6 +64,10 @@ nodes:
   gpu05:
     platform: azure
     resource_group: demo-power-group
+  # This config does not check for missing platforms. Instead missing platforms
+  # will always run 'exit 1' as there commands
+  badnode:
+    platform: missing_platform
 
 # Define the platforms her
 platforms:

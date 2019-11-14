@@ -29,6 +29,22 @@
 
 require 'open3'
 require 'memoist'
+require 'parallel'
+
+Commands = Struct.new(:action, :nodes) do
+  extend Memoist
+
+  def commands
+    nodes.map { |n| Command.new(action, n) }
+  end
+  memoize :commands
+
+  def run_in_parallel
+    Parallel.each(commands, in_threads: Figaro.env.num_worker_commands.to_i) do |cmd|
+      cmd.capture2e
+    end
+  end
+end
 
 Command = Struct.new(:action, :node) do
   extend Memoist

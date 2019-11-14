@@ -43,7 +43,7 @@ ENV['app_root_dir'] = File.expand_path('../..', __dir__)
 root_dir = ENV['app_root_dir']
 
 relative_keys = ['topology_config']
-Figaro.require_keys(*relative_keys)
+Figaro.require_keys('num_worker_commands', *relative_keys)
 
 # Sets relative keys from the install directory
 # NOTE: Does not affect the path if it is already absolute

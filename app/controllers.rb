@@ -64,7 +64,7 @@ module HasPowerRoutes
   end
 
   def commands(action)
-    nodes.map { |n| Command.new(action, n) }
+    Commands.new(action, nodes).tap(&:run_in_parallel).commands
   end
 end
 

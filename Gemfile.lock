@@ -25,6 +25,7 @@ GEM
     minitest (5.13.0)
     multi_json (1.14.1)
     mustermann (1.0.3)
+    parallel (1.19.0)
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -81,6 +82,7 @@ DEPENDENCIES
   jsonapi-serializers
   jwt
   memoist
+  parallel
   pry
   pry-byebug
   rack-test

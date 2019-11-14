@@ -70,11 +70,11 @@ end
 
 class NodeController < Sinatra::Base
   def self.path
-    /\/(?<nodeattr_str>[[:alnum:]]+)/
+    /\/(?<nodeattr_str>[[:alnum:]]+(?:%5B\d+(?:-\d+)?%5D)?)/
   end
 
   def node_names
-    [params['nodeattr_str']]
+    Nodeattr.explode_nodes(params['nodeattr_str'].sub('%5B', '[').sub('%5D', ']'))
   end
 
   # Must be included AFTER path has been defined

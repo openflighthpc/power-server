@@ -51,6 +51,7 @@ end
 task require: :require_bundler do
   require 'config/initializers/active_support'
   require 'config/initializers/figaro'
+  require 'app/nodeattr'
   require 'app/command'
   require 'app/models'
   require 'app/serializers'

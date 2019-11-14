@@ -33,6 +33,14 @@ require 'memoist'
 Command = Struct.new(:action, :node) do
   extend Memoist
 
+  def jsonapi_serializer_class_name
+    if action == :status
+      StatusCommandSerializer
+    else
+      CommandSerializer
+    end
+  end
+
   def id
     node.name.to_s
   end

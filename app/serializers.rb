@@ -35,9 +35,24 @@ class ApplicationSerializer
   end
 end
 
-class CommandSerializer < ApplicationSerializer
+class BaseCommandSerializer < ApplicationSerializer
   attributes :action
   attribute(:node_name) { object.id }
-  attribute(:status) { object.exit_code == 0 ? 'Pass' : 'Fail' }
+  attribute(:platform) { object.node.platform }
+end
+
+class CommandSerializer < BaseCommandSerializer
+  attribute(:success) { object.exit_code == 0 }
+end
+
+class StatusCommandSerializer < BaseCommandSerializer
+  attribute(:success) do
+    [0, object.platform.status_off_exit_code].include?(object.exit_code)
+  end
+
+  attribute(:running) do
+    return true if object.exit_code == 0
+    return false if object.exit_code == object.platform.status_off_exit_code
+  end
 end
 

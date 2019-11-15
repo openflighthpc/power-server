@@ -42,7 +42,6 @@ The application needs the following configuration values in order to run. These 
 
 ```
 # Either set them into the environment
-export app_base_url=http://example.com
 export jwt_shared_secret=<keep-this-secret-safe>
 
 # Or hard code them in the config file:
@@ -55,16 +54,18 @@ A basic `systemd` unit file can be found [here](support/power-server.service). T
 
 ## Starting the Server
 
-\*NOTE: If the application is running behind `apache` and `nginx`, it will need to be proxied to another port. The default port is `8080`.
-
-### Issues Starting the Server
-
-If the above command raises a `Figaro::MissingKeys` error than the server has been missed configured and cannot be start. Please refer [configuration](#Configuration) for further assistance.
-
-The next place to check when debugging server issues is the `stderr` log. The logs location depends on how the application has been configured, but the following will work for the default production environment:
+The `puma` server daemon can be started manually with:
 
 ```
-tail -f log/stderr.log
+bin/puma -p <port> -e production -d
+```
+
+## Stopping the Server
+
+The `puma` server daemon can be stopped manually by sending an interrupt:
+
+```
+kill -s SIGINT <puma-pid>
 ```
 
 ## Authentication

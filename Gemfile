@@ -34,13 +34,14 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 gem 'activesupport'
 gem 'figaro'
 gem 'hashie'
-gem 'memoist'
+gem 'jsonapi-serializers'
 gem 'jwt'
+gem 'memoist'
 gem 'parallel'
+gem 'puma'
 gem 'rake'
 gem 'sinatra'
 gem 'sinatra-contrib'
-gem 'jsonapi-serializers'
 
 group :development, :test do
   gem 'pry'

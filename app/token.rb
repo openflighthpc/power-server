@@ -27,25 +27,56 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-require 'figaro'
+require 'hashie'
+require 'jwt'
 
-# Loads the configurations into the environment
-Figaro.application = Figaro::Application.new(
-  environment: (ENV['RACK_ENV'] || 'development').to_sym,
-  path: File.expand_path('../application.yaml', __dir__)
-)
-Figaro.load
-      .reject { |_, v| v.nil? }
-      .each { |key, value| ENV[key] ||= value }
+class Token < Hashie::Trash
+  include Hashie::Extensions::IgnoreUndeclared
 
-# Hard sets the app's root directory to the current code base
-ENV['app_root_dir'] = File.expand_path('../..', __dir__)
-root_dir = ENV['app_root_dir']
+  DEFAULTS = {
+    valid: false,
+    expired_error: false,
+    signature_error: false,
+    iat_error: false
+  }
 
-relative_keys = ['topology_config']
-Figaro.require_keys('jwt_shared_secret', 'num_worker_commands', *relative_keys)
+  class << self
+    def jwt_shared_secret
+      Figaro.env.jwt_shared_secret
+    end
 
-# Sets relative keys from the install directory
-# NOTE: Does not affect the path if it is already absolute
-relative_keys.each { |k| ENV[k] = File.absolute_path(ENV[k], root_dir) }
+    def from_jwt(token)
+      body, _ = begin
+        JWT.decode(token, jwt_shared_secret, true, { algorithm: 'HS256' })
+          .merge(**DEFAULTS).merge(valid: true)
+      rescue JWT::ExpiredSignature
+        [DEFAULTS.merge(expired_error: false), nil]
+      rescue JWT::InvalidIatError
+        [DEFAULTS.merge(iat_error: false), nil]
+      rescue JWT::VerificationError
+        [DEFAULTS.merge(signature_error: false), nil]
+      rescue JWT::DecodeError
+        [DEFAULTS, nil]
+      end.symbolize_keys
+      new(**body)
+    end
+  end
+
+  property :valid
+  property :expired
+  property :signature
+  property :admin
+
+  property :exp, default: nil, transform_with: ->(value) do
+    if value.nil?
+      30.days.from_now.to_i
+    else
+      value.to_i
+    end
+  end
+
+  def token_attributes
+    { admin: admin, exp: exp }
+  end
+end
 

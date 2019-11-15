@@ -50,7 +50,7 @@ vim config/application.yaml
 
 ### Setting Up Systemd
 
-A basic `systemd` unit file can be found [here](support/power-server.service). The unit file will need to be tweaked according to where the application has been installed/configured.
+A basic `systemd` unit file can be found [here](support/power-server.service). The unit file will need to be tweaked according to where the application has been installed/configured. The unit needs to be stored within `/etc/systemd/system`.
 
 ## Starting the Server
 

@@ -1,0 +1,19 @@
+[Unit]
+Description=Flight Power Server
+Requires=network.target
+
+[Service]
+Type=simple
+User=root
+
+# The working directory needs to be where the application has been installed
+WorkingDirectory=/opt/flight/opt/power-server
+
+# The application must be fully configured within the user's environment OR
+# within 'config/application.yaml'
+ExecStart=bin/puma -p 8080 -e production -d
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -15,6 +15,10 @@ The following are required to run this application:
 * Ruby:         2.6+
 * Yum Packages: gcc
 
+The following are required by the example `topology` configuration file. Custom configurations may not need these tools.
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-linux-al2017.html)
+* [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum?view=azure-cli-latest)
+
 ### Manual installation
 
 Start by cloning the repo, adding the binaries to your path, and install the gems. This guide assumes the `bin` directory is on your `PATH`. If you prefer not to modify your `PATH`, then some of the commands need to be prefixed with `/path/to/app/bin`.

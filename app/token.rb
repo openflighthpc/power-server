@@ -33,6 +33,7 @@ require 'jwt'
 class Token < Hashie::Trash
   include Hashie::Extensions::IgnoreUndeclared
 
+  ALGORITHM = 'HS256'
   DEFAULTS = {
     valid: false,
     expired_error: false,
@@ -47,7 +48,7 @@ class Token < Hashie::Trash
 
     def from_jwt(token)
       body, _ = begin
-        JWT.decode(token, jwt_shared_secret, true, { algorithm: 'HS256' })
+        JWT.decode(token, jwt_shared_secret, true, { algorithm: ALGORITHM })
           .merge(**DEFAULTS).merge(valid: true)
       rescue JWT::ExpiredSignature
         [DEFAULTS.merge(expired_error: false), nil]
@@ -77,6 +78,10 @@ class Token < Hashie::Trash
 
   def token_attributes
     { admin: admin, exp: exp }
+  end
+
+  def generate_jwt
+    JWT.encode(token_attributes, self.class.jwt_shared_secret, ALGORITHM)
   end
 end
 

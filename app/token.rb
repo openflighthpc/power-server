@@ -47,19 +47,19 @@ class Token < Hashie::Trash
     end
 
     def from_jwt(token)
-      body, _ = begin
-        JWT.decode(token, jwt_shared_secret, true, { algorithm: ALGORITHM })
-          .merge(**DEFAULTS).merge(valid: true)
+      body = begin
+        data, _ = JWT.decode(token, jwt_shared_secret, true, { algorithm: ALGORITHM })
+        data.merge(**DEFAULTS).merge(valid: true)
       rescue JWT::ExpiredSignature
-        [DEFAULTS.merge(expired_error: false), nil]
+        DEFAULTS.merge(expired_error: false)
       rescue JWT::InvalidIatError
-        [DEFAULTS.merge(iat_error: false), nil]
+        DEFAULTS.merge(iat_error: false)
       rescue JWT::VerificationError
-        [DEFAULTS.merge(signature_error: false), nil]
+        DEFAULTS.merge(signature_error: false)
       rescue JWT::DecodeError
-        [DEFAULTS, nil]
-      end.symbolize_keys
-      new(**body)
+        DEFAULTS
+      end
+      new(**body.symbolize_keys)
     end
   end
 

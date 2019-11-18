@@ -34,6 +34,8 @@ require "sinatra/json"
 module HasPowerRoutes
   extend ActiveSupport::Concern
 
+  BEARER_REGEX = /\ABearer\s(?<token>.*)\Z/
+
   class_methods do
     def path
       raise NotImplementedError
@@ -41,6 +43,26 @@ module HasPowerRoutes
   end
 
   included do
+    include Pundit
+
+    # Override Authorize to require two arguments. Single argument mode is only
+    # supported by rails
+    def authorize(record, query)
+      super
+    end
+
+    def token
+      BEARER_REGEX.match(env['HTTP_AUTHORIZATION'] || '')&.named_captures&.[]('token')
+    end
+
+    def pundit_user
+      Token.from_jwt(token || '')
+    end
+
+    configure do
+      set :show_exceptions, :after_handler
+    end
+
     helpers do
       def serialize_models(models, options = {})
         options[:is_collection] = true
@@ -48,6 +70,15 @@ module HasPowerRoutes
           result['data'].each { |model| model.delete('links') }
         end
       end
+    end
+
+    before do
+      authorize :command, :valid?
+    end
+
+    error Pundit::NotAuthorizedError do
+      status 403
+      body "Forbidden"
     end
 
     get(path)     { json serialize_models(commands(:status)) }

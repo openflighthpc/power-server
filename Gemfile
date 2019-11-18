@@ -40,6 +40,7 @@ gem 'memoist'
 gem 'parallel'
 gem 'puma'
 gem 'rake'
+gem 'pundit'
 gem 'sinatra'
 gem 'sinatra-contrib'
 

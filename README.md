@@ -36,6 +36,8 @@ bundle install --without development test --path vendor
 bin/bundle install --without development test --path vendor
 ```
 
+Additional configuration is required for the `aws` and `az` command lines to work. Please refer to there reference documents on how to install them. This service assumes they have been pre installed and configured with the appropriate credentials.
+
 ### Configuration
 
 The application needs the following configuration values in order to run. These can either be exported into your environment or directly set in `config/application.yaml`.
@@ -47,6 +49,41 @@ export jwt_shared_secret=<keep-this-secret-safe>
 # Or hard code them in the config file:
 vim config/application.yaml
 ```
+
+### Adding Nodes And Platforms
+
+The layout of the cluster is specified in the topology config file which is stored as `config/topology.yaml` by default. It must specify the `nodes` and `platforms` key.
+
+#### Getting Started
+
+A handy example config ships with this application to help you get started. It first
+needs to be copied into place:
+
+```
+# NOTE: Copying the config into place will maintain the example for future reference
+cp config/topology.example.yaml config/topology.yaml
+```
+
+All further actions will be preformed on `config/topology.yaml`. A basic list of `nodes` has been provided with this config. It is now safe to remove them.
+
+#### Adding a Platform
+
+The example topology ships with the `aws`, `azure`, and `ipmi` platforms preconfigured. Move onto the nodes section if you wish to use one of these three.
+
+Alternatively a custom platform can be added:
+
+```
+platforms:
+  my-custom-platform:
+    variables: [] # Array of variables to pass into the command
+    power_on: ''  # String specifying the power on bash command
+    power_off: '' # String specifying the power off bash command
+    restart: ''   # String specifying the restart bash command
+    status: ''    # String specifying the status bash command
+    status_off_exit_code: 255 # [Optional] Specify the off exit code
+```
+
+The majority of the above variables 
 
 ### Setting Up Systemd
 

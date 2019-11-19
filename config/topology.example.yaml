@@ -27,7 +27,7 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-# Create a basic 5 node, 5 gpu cluster
+# Create a basic demo cluster
 nodes:
   node01:
     platform: aws
@@ -64,6 +64,21 @@ nodes:
   gpu05:
     platform: azure
     resource_group: demo-power-group
+  metal01:
+    platform: ipmi
+    ipmi_username: admin
+  metal02:
+    platform: ipmi
+    ipmi_username: admin
+  metal03:
+    platform: ipmi
+    ipmi_username: admin
+  metal04:
+    platform: ipmi
+    ipmi_username: admin
+  metal05:
+    platform: ipmi
+    ipmi_username: admin
   # This config does not check for missing platforms. Instead missing platforms
   # will always run 'exit 1' as there commands
   badnode:
@@ -71,13 +86,26 @@ nodes:
 
 # Define the platforms here
 platforms:
+  ipmi:
+    variables: [name, ipmi_username]
+    power_on: ipmitool -H "$name"-bmc -U "$ipmi_username" -E chassis power on -I lanplus
+    power_off: ipmitool -H "$name"-bmc -U "$ipmi_username" -E chassis power off -I lanplus
+    restart: ipmitool -H "$name"-bmc -U "$ipmi_username" -E chassis power reset -I lanplus
+    status: |-
+      output=$(ipmitool -H "$name"-bmc -U "$ipmi_username" -E chassis power status -I lanplus)
+      if echo "$output" | grep on; then
+        exit 0
+      elif echo "$output" | grep off; then
+        exit 255
+      else
+        exit 1
+      fi
+
   aws:
     variables: [ec2_id, region]
     power_on: aws ec2 start-instances --instance-ids "$ec2_id" --region "$region"
     power_off: aws ec2 stop-instances --instance-ids "$ec2_id" --region "$region"
-    # The status command must return 0 for "on". This example then overrides the default "off"
-    # exit code from 255 to 123. This is for demonstration purposes ONLY and is not strictly
-    # required for AWS.
+    restart: aws ec2 reboot-instances --instance-ids "$ec2_id" --region "$region"
     status_off_exit_code: 123 # Default: 255
     status: |-
       status=$(aws ec2 describe-instances --instance-ids "$ec2_id" \
@@ -88,7 +116,7 @@ platforms:
           exit 0
           ;;
         \"stopped\")
-          exit 123 # Change this to 255 if 'status_off_exit_code' hasn't been set
+          exit 123
           ;;
         *)
           exit 1
@@ -99,9 +127,9 @@ platforms:
     variables: [resource_group, name]
     power_on: az vm start --resource-group "$resource_group" --name "$name"
     power_off: az vm stop --resource-group "$resource_group" --name "$name"
+    restart: az vm restart --resource-group "$resource_group" --name "$name"
     # status_off_exit_code: 255
     status: |-
-      set -e
       status=$(az vm get-instance-view --resource-group "$resource_group" \
                                        --name "$name" \
                                        --query instanceView.statuses[1].code)

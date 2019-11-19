@@ -83,7 +83,40 @@ platforms:
     status_off_exit_code: 255 # [Optional] Specify the off exit code
 ```
 
-The majority of the above variables 
+The majority of the above parameters give scripts to be ran when the relevant end point is hit. These are bash scripts that executed within the environment the server was started in.
+
+It is therefore possible to store the relevant credentials within the environment to prevent hard coding them in a config.
+
+The `variables` parameter is used to customise the command on a per node basis. They can be referenced using standard bash syntax: `$var1`, `$var2`, etc. The value is pulled from the nodes hash as described below.
+
+#### Adding the Nodes
+
+The `nodes` are also set within the `topology` config and are used to customise the bash commands. The generic layouts is:
+
+```
+nodes:
+  my-first-node:
+    platform: 'my-custom-platform'  # [Required] The platform the node is on
+    var1: some-value                # Any number of arbitrary variables
+    var2: some-other-value
+    ...
+    # name: my-first-node           # The 'name' variable is implicitly set from
+                                    # the node key and can not be overridden
+
+  aws-node:     # Example AWS node
+    platform: aws
+    ec2_id: i-xxxxxxxxxxxxx
+    region: eu-west-1
+    # name: aws-node
+
+  azure-node:   # Example Azure node
+    resource_group: my-demo-group
+    # name: azure-node
+```
+
+The variables specified on the platform will preform a lookup against the nodes. This is primarily used to set some form of identifier against the node. The exact keys depends on the `platform` configuration.
+
+The node `name` is implicitly set so it can be used as a variable and can not be overridden.
 
 ### Setting Up Systemd
 

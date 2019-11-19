@@ -25,6 +25,7 @@ mongoid_config:   config/mongoid.yaml
 
 # STATIC DEFAULTS:
 num_worker_commands:  '50'
+enable_mongoid: 'true'
 
 development:
   topology_config: config/topology.example.yaml

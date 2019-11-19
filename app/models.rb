@@ -108,3 +108,15 @@ class Platform < Hashie::Dash
   property  :status_off_exit_code,  default: 255
 end
 
+if Figaro.env.enable_mongoid == 'true'
+  class NodeDB
+    include Mongoid::Document
+    include Mongoid::Attributes::Dynamic
+
+    field :name
+    field :platform
+
+    index({ name: 1 }, { unique: true })
+  end
+end
+

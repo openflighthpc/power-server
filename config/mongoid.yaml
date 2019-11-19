@@ -2,5 +2,5 @@ development:
   clients:
     default:
       database: flight-share-dev
-      hosts: localhost:27017
+      hosts: mongodb://localhost:27017
 

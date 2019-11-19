@@ -62,8 +62,20 @@ helpers do
     end
   end
 
+  def serialize_errors(errors)
+    JSONAPI::Serializer.serialize_errors(errors)
+  end
+
+  def nodes_param
+    if /\A[[:alnum:]]+(\[\d+(-\d+)\])?\Z/.match? params[:nodes]
+      params[:nodes]
+    else
+      halt 400, serialize_errors([{ nodes: 'Unrecognised nodes syntax' }]).to_json
+    end
+  end
+
   def node_names
-    Nodeattr.explode_nodes(params['nodeattr_str'].sub('%5B', '[').sub('%5D', ']'))
+    Nodeattr.explode_nodes(nodes_param)
   end
 
   def nodes
@@ -84,9 +96,7 @@ error Pundit::NotAuthorizedError do
   body "Forbidden"
 end
 
-namespace(/\/(?<nodeattr_str>[[:alnum:]]+(?:%5B\d+(?:-\d+)?%5D)?)/) do
-  get('')     { json serialize_models(commands(:status)) }
-  patch('')   { json serialize_models(commands(:power_on)) }
-  delete('')  { json serialize_models(commands(:power_off)) }
-end
+get('/')     { json serialize_models(commands(:status)) }
+patch('/')   { json serialize_models(commands(:power_on)) }
+delete('/')  { json serialize_models(commands(:power_off)) }
 

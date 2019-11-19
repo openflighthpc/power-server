@@ -100,7 +100,8 @@ error Pundit::NotAuthorizedError do
   body "Forbidden"
 end
 
-get('/')     { json serialize_models(commands(:status)) }
-patch('/')   { json serialize_models(commands(:power_on)) }
-delete('/')  { json serialize_models(commands(:power_off)) }
+get('/')    { json serialize_models(commands(:status)) }
+patch('/')  { json serialize_models(commands(:power_on)) }
+put('/')    { json serialize_models(commands(:restart)) }
+delete('/') { json serialize_models(commands(:power_off)) }
 

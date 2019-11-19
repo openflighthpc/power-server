@@ -64,13 +64,12 @@ task console: :require do
   binding.pry
 end
 
-task 'token:admin' => :require do
-  # puts User.new(admin: true).generate_jwt
-  raise NotImplementedError
-end
+# task 'token:admin' => :require do
+#   # puts User.new(admin: true).generate_jwt
+#   raise NotImplementedError
+# end
 
 task 'token:user' => :require do
-  # puts User.new(user: true).generate_jwt
-  raise NotImplementedError
+  puts Token.new.generate_jwt
 end
 

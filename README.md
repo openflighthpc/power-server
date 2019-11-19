@@ -75,7 +75,7 @@ Alternatively a custom platform can be added:
 ```
 platforms:
   my-custom-platform:
-    variables: [] # Array of variables to pass into the command
+    variables: [var1, varr2]  # Array of variables to pass into the command
     power_on: ''  # String specifying the power on bash command
     power_off: '' # String specifying the power off bash command
     restart: ''   # String specifying the restart bash command
@@ -88,6 +88,11 @@ The majority of the above parameters give scripts to be ran when the relevant en
 It is therefore possible to store the relevant credentials within the environment to prevent hard coding them in a config.
 
 The `variables` parameter is used to customise the command on a per node basis. They can be referenced using standard bash syntax: `$var1`, `$var2`, etc. The value is pulled from the nodes hash as described below.
+
+All the commands (with exception of `status`) must exit 0 in order to be considered a "success". This means the command has been successfully submitted to the platform and is now be preformed. It does not have to wait for the action to be fully complete NOR does it mean it will complete without error. This behaviour is intentionally platform specific.
+
+The `status` command has two exit codes that are considered "successes": 0 and `status_off_exit_code`. An exit code of 0 must be returned if the node is currently running. The `status_off_exit_code` defaults to 255 and must be returned if the node is offline. All other exit codes are failures and the state of the node is undetermined.
+NOTE: `starting` and `stopping` are not currently supported power states and should be considered a failure condition.
 
 #### Adding the Nodes
 

@@ -103,7 +103,7 @@ class Platform < Hashie::Dash
   property  :variables, default: []
   property  :power_on,  default: 'exit 1'
   property  :power_off, default: 'exit 1'
-  property  :reboot,    default: 'exit 1'
+  property  :restart,   default: 'exit 1'
   property  :status,    default: 'exit 1'
   property  :status_off_exit_code,  default: 255
 end

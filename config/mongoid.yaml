@@ -1,0 +1,6 @@
+development:
+  clients:
+    default:
+      database: flight-share-dev
+      hosts: localhost:27017
+

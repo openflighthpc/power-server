@@ -27,25 +27,7 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-require 'figaro'
+require 'mongoid'
 
-# Loads the configurations into the environment
-Figaro.application = Figaro::Application.new(
-  environment: (ENV['RACK_ENV'] || 'development').to_sym,
-  path: File.expand_path('../application.yaml', __dir__)
-)
-Figaro.load
-      .reject { |_, v| v.nil? }
-      .each { |key, value| ENV[key] ||= value }
-
-# Hard sets the app's root directory to the current code base
-ENV['app_root_dir'] = File.expand_path('../..', __dir__)
-root_dir = ENV['app_root_dir']
-
-relative_keys = ['topology_config', 'mongoid_config']
-Figaro.require_keys('jwt_shared_secret', 'num_worker_commands', *relative_keys)
-
-# Sets relative keys from the install directory
-# NOTE: Does not affect the path if it is already absolute
-relative_keys.each { |k| ENV[k] = File.absolute_path(ENV[k], root_dir) }
+Mongoid.load!(Figaro.env.mongoid_config, Sinatra::Base.environment)
 

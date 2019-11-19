@@ -21,9 +21,10 @@
 # The following may use relative paths from the install directory
 # or hard coded to be an absolute path
 topology_config:  config/topology.yaml
+mongoid_config:   config/mongoid.yaml
 
 # STATIC DEFAULTS:
-num_worker_commands: '50'
+num_worker_commands:  '50'
 
 development:
   topology_config: config/topology.example.yaml

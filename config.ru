@@ -44,5 +44,5 @@ rescue => e
   exit 1
 end
 
-map('/nodes') { run NodeController }
+run Sinatra::Application
 

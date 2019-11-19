@@ -57,7 +57,7 @@ task require: :require_bundler do
   require 'app/policies'
   require 'app/models'
   require 'app/serializers'
-  require 'app/controllers'
+  require 'app'
 end
 
 task console: :require do

@@ -33,6 +33,7 @@ require 'sinatra'
 require "sinatra/json"
 
 BEARER_REGEX = /\ABearer\s(?<token>.*)\Z/
+NODE_REGEX = /[[:alnum:]]+(\[\d+(-\d+)\])?/
 
 configure do
   set :show_exceptions, :after_handler
@@ -67,7 +68,7 @@ helpers do
   end
 
   def nodes_param
-    if /\A[[:alnum:]]+(\[\d+(-\d+)\])?\Z/.match? params[:nodes]
+    if /\A#{NODE_REGEX}(,#{NODE_REGEX})*\Z/.match? params[:nodes]
       params[:nodes]
     else
       halt 400, serialize_errors([{ nodes: 'Unrecognised nodes syntax' }]).to_json
@@ -75,7 +76,10 @@ helpers do
   end
 
   def node_names
-    Nodeattr.explode_nodes(nodes_param)
+    nodes_param.split(',')
+               .map { |n| Nodeattr.explode_nodes(n) }
+               .flatten
+               .uniq
   end
 
   def nodes

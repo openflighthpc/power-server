@@ -92,6 +92,7 @@ API requests will always respond with a `success` boolean value based on the exi
 The `status` command has two exit codes that are considered "successes", 0 and `status_off_exit_code`. An exit code of 0 must be returned if the node is currently running. The `status_off_exit_code` defaults to 255 and must be returned if the node is offline. All other exit codes are failures and the state of the node is undetermined.
 
 NOTE: `Starting` and `Stopping` States
+
 The API only supports nodes in `on` or `off` power states. Transitionary states (such as `starting`/`stopping`) are not supported and can not be communicated through the API. In these cases, the `status` script should return a failure exit code but may return either 0 or `status_off_exit_code`. There is no preference for the last known state versus the likely future state.
 
 #### Adding the Nodes

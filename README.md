@@ -75,7 +75,7 @@ Alternatively a custom platform can be added:
 ```
 platforms:
   my-custom-platform:
-    variables: [var1, varr2]  # Array of variables to pass into the command
+    variables: [var1, var2]  # Array of variables to pass into the command
     power_on: ''  # String specifying the power on bash command
     power_off: '' # String specifying the power off bash command
     restart: ''   # String specifying the restart bash command
@@ -83,16 +83,16 @@ platforms:
     status_off_exit_code: 255 # [Optional] Specify the off exit code
 ```
 
-The majority of the above parameters give scripts to be ran when the relevant end point is hit. These are bash scripts that executed within the environment the server was started in.
-
-It is therefore possible to store the relevant credentials within the environment to prevent hard coding them in a config.
+The majority of the above parameters give scripts to be ran when the relevant end point is hit. These are bash scripts that executed within the environment the server was started in. It is therefore possible to store the relevant credentials within the environment to prevent hard coding them in a config.
 
 The `variables` parameter is used to customise the command on a per node basis. They can be referenced using standard bash syntax: `$var1`, `$var2`, etc. The value is pulled from the nodes hash as described below.
 
-All the commands (with exception of `status`) must exit 0 in order to be considered a "success". This means the command has been successfully submitted to the platform and is now be preformed. It does not have to wait for the action to be fully complete NOR does it mean it will complete without error. This behaviour is intentionally platform specific.
+The server will always a `success` boolean value based on the exit code of the script. An exit value of 0 is considered a successful request. To prevent the client applications from hanging, the scripts may choose to exit 0 before the action has fully completed. This means a `success` response only means the action was submitted correctly NOT that it has completed correctly. All non zero exit codes are considered failures with the following exception.
 
-The `status` command has two exit codes that are considered "successes": 0 and `status_off_exit_code`. An exit code of 0 must be returned if the node is currently running. The `status_off_exit_code` defaults to 255 and must be returned if the node is offline. All other exit codes are failures and the state of the node is undetermined.
-NOTE: `starting` and `stopping` are not currently supported power states and should be considered a failure condition.
+The `status` command has two exit codes that are considered "successes", 0 and `status_off_exit_code`. An exit code of 0 must be returned if the node is currently running. The `status_off_exit_code` defaults to 255 and must be returned if the node is offline. All other exit codes are failures and the state of the node is undetermined.
+
+NOTE: `Starting` and `Stopping` States
+The API only supports nodes in `on` or `off` power states. Transitionary states (such as `starting`/`stopping`) are not supported and can not be communicated through the API. In these cases, the scripts should return a failure exit code. They may however return either 0 or `status_off_exit_code`. There is no preference for the last known state versus the likely future state in this situation.
 
 #### Adding the Nodes
 
@@ -119,7 +119,7 @@ nodes:
     # name: azure-node
 ```
 
-The variables specified on the platform will preform a lookup against the nodes. This is primarily used to set some form of identifier against the node. The exact keys depends on the `platform` configuration.
+The variables specified on the platform will preform a lookup against the nodes. This is primarily used to set some form of node identifier bash variable (e.g. `$ec2_id`) in the script. The exact keys depends on the `platform` configuration.
 
 The node `name` is implicitly set so it can be used as a variable and can not be overridden.
 
@@ -145,21 +145,17 @@ kill -s SIGINT <puma-pid>
 
 ## Authentication
 
-The API requires all requests to carry with a [jwt](https://jwt.io). Within the token either `user: true` or `admin: true` needs to be set. This will authenticate with either `user` or `admin` privileges respectively. Admins have full access to the API where users can only make `GET` requests.
+The API requires all requests to carry with a [jwt](https://jwt.io). Within the token either `user: true` or `admin: true` needs to be set.
 
 The following `rake` tasks are used to generate tokens with 30 days expiry. Tokens from other sources will be accepted as long as they:
-1. Where signed with the same shared secret,
-2. Set either `user: true` or `admin: true` in the token body, and
-3. An [expiry claim](https://tools.ietf.org/html/rfc7519#section-4.1.4) has been made.
+1. Where signed with the same shared secret, and
+2. An [expiry claim](https://tools.ietf.org/html/rfc7519#section-4.1.4) has been made.
 
 As the shared secret is environment dependant, the `RACK_ENV` must be set within your environment.
 
 ```
 # Set the rack environment
 export RACK_ENV=production
-
-# Generate a admin token:
-rake token:admin
 
 # Generate a user token
 rake token:user

@@ -50,6 +50,10 @@ end
 Command = Struct.new(:action, :node) do
   extend Memoist
 
+  def self.working_dir
+    Figaro.env.scripts_dir
+  end
+
   def jsonapi_serializer_class_name
     if action == :status
       StatusCommandSerializer
@@ -67,10 +71,13 @@ Command = Struct.new(:action, :node) do
                    .map { |v| "#{v}=\"#{node.attributes[v]}\"" }
                    .join("\n")
     <<~CMD
-      # Configuration Parameters For: #{node.name}
+      # Working Directory:
+      cd #{self.class.working_dir}
+
+      # Configuration Parameters: #{node.name}
       #{args}
 
-      # Command For: #{node.platform}##{action}
+      # Run: #{node.platform}:#{action}
       #{platform[action]}
     CMD
   end

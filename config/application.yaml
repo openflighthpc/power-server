@@ -21,6 +21,7 @@
 # The following may use relative paths from the install directory
 # or hard coded to be an absolute path
 topology_config:  config/topology.yaml
+scripts_dir:      var/libexec
 
 # STATIC DEFAULTS:
 num_worker_commands: '50'

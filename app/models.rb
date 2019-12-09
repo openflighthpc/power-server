@@ -50,28 +50,50 @@ class Topology < Hashie::Trash
 
   include Hashie::Extensions::Dash::Coercion
 
-  # Converts the nodes hash into Node objects
-  property  :nodes, required: true, coerce: Hash[Symbol => Hash],
-            transform_with: ->(h) { Nodes.new(h) }
+  def initialize(*_)
+    super
+    raise <<~ERROR.squish if static_nodes && remote
+      The topology config can not set both the `static_nodes` and `remote`
+      options
+    ERROR
+  end
+
+  def nodes
+    static_nodes || dynamic_nodes || raise('Could not load the nodes data')
+  end
+
+  def dynamic_nodes
+    return nil unless remote
+    {}
+  end
+
+  # Define the remote nodeattr server
+  property  :remote, coerce: String
+
+  # Converts the static_nodes hash into StaticNodes object
+  property  :static_nodes, coerce: Hash[Symbol => Hash],
+            transform_with: ->(h) { Nodes::StaticNodes.new(h) }
 
   # Converts the platform hash into Platform Objects
   property  :platforms, required: true, coerce: Hash[Symbol => Hash],
             transform_with: ->(h) { Platforms.new(h) }
 end
 
-class Nodes < Hashie::Mash
-  def initialize(**node_hash)
-    nodes = node_hash.map do |name, attr|
-      node = Node.new name: name,
-                      platform: attr.delete(:platform),
-                      attributes: attr.merge(name: name)
-      [name, node]
+module Nodes
+  class StaticNodes < Hashie::Mash
+    def initialize(**node_hash)
+      nodes = node_hash.map do |name, attr|
+        node = Node.new name: name,
+                        platform: attr.delete(:platform),
+                        attributes: attr.merge(name: name)
+        [name, node]
+      end
+      super(nodes.to_h)
     end
-    super(nodes.to_h)
-  end
 
-  def [](key)
-    super(key) || Node.new(name: key, attributes: { name: key }, missing: true)
+    def [](key)
+      super(key) || Node.new(name: key, attributes: { name: key }, missing: true)
+    end
   end
 end
 

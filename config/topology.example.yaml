@@ -27,8 +27,8 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-# Create a basic demo cluster
-nodes:
+# Define a static set of Nodes (Can not be used with remote key)
+static_nodes:
   node01:
     platform: aws
     ec2_id: i-node01xxxxxxxxxxx
@@ -83,6 +83,10 @@ nodes:
   # will always run 'exit 1' as there commands
   badnode:
     platform: missing_platform
+
+# Integrate with OpenFlighHPC/NodeattrServer. This provides full groups support
+# and dynamic node parameters. Can not be used with the `static_nodes` key
+# remote: https://localhost:6301
 
 # Define the platforms here
 platforms:

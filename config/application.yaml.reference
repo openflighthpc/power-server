@@ -32,6 +32,13 @@ jwt_shared_secret:
 topology_config:
 
 # =============================================================================
+# Scripts Directory
+# Specify the working directory for the commands. This is to allow the commands
+# to call other scripts easily
+# =============================================================================
+scripts_dir:
+
+# =============================================================================
 # Number of Worker Commands
 # Specify the number of commands that will be ran in parallel. This is to
 # prevent network timeouts due to a large number of requests being made

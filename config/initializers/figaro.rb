@@ -42,7 +42,7 @@ Figaro.load
 ENV['app_root_dir'] = File.expand_path('../..', __dir__)
 root_dir = ENV['app_root_dir']
 
-relative_keys = ['topology_config']
+relative_keys = ['topology_config', 'scripts_dir']
 Figaro.require_keys('jwt_shared_secret', 'num_worker_commands', *relative_keys)
 
 # Sets relative keys from the install directory

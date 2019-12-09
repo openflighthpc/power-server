@@ -39,15 +39,25 @@ Commands = Struct.new(:action, :nodes) do
   end
   memoize :commands
 
-  def run_in_parallel
+  def run_in_parallel(logger)
     Parallel.each(commands, in_threads: Figaro.env.num_worker_commands.to_i) do |cmd|
-      cmd.capture2e
+      if cmd.missing?
+        logger.error "Could not locate node: #{cmd.node.name}"
+      else
+        cmd.log(logger)
+      end
     end
   end
 end
 
 Command = Struct.new(:action, :node) do
   extend Memoist
+
+  delegate :missing?, to: :node
+
+  def self.working_dir
+    Figaro.env.scripts_dir
+  end
 
   def jsonapi_serializer_class_name
     if action == :status
@@ -66,10 +76,13 @@ Command = Struct.new(:action, :node) do
                    .map { |v| "#{v}=\"#{node.attributes[v]}\"" }
                    .join("\n")
     <<~CMD
-      # Configuration Parameters For: #{node.name}
+      # Working Directory:
+      cd #{self.class.working_dir}
+
+      # Configuration Parameters: #{node.name}
       #{args}
 
-      # Command For: #{node.platform}##{action}
+      # Run: #{node.platform}:#{action}
       #{platform[action]}
     CMD
   end
@@ -80,17 +93,43 @@ Command = Struct.new(:action, :node) do
   end
   memoize :platform
 
-  def capture2e
-    Open3.capture2e(cmd)
+  def capture3
+    if missing?
+      [nil, nil, nil]
+    else
+      Open3.capture3(cmd)
+    end
   end
-  memoize :capture2e
+  memoize :capture3
 
   def exit_code
-    capture2e.last.exitstatus
+    capture3.last&.exitstatus
   end
 
-  def stdout_and_stderr
-    capture2e.first
+  def stdout
+    capture3.first
+  end
+
+  def stderr
+    capture3[1]
+  end
+
+  def log(logger)
+    msg = <<~MSG
+
+      ## Command ##
+      #{cmd}
+
+      ## Exit Code ##
+      #{ exit_code }
+
+      ## STDOUT ##
+      #{stdout}
+
+      ## STDERR ##
+      #{stderr}
+    MSG
+    exit_code == 0 ? logger.info(msg) : logger.error(msg)
   end
 end
 

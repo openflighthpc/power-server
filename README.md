@@ -133,7 +133,9 @@ A basic `systemd` unit file can be found [here](support/power-server.service). T
 The `puma` server daemon can be started manually with:
 
 ```
-bin/puma -p <port> -e production -d
+bin/puma -p <port> -e production -d \
+         --redirect-stdout <stdout-log-file-path> \
+         --redirect-stderr <stderr-log-file-path>
 ```
 
 ## Stopping the Server
@@ -149,17 +151,20 @@ kill -s SIGINT <puma-pid>
 The API requires all requests to carry with a [jwt](https://jwt.io). Within the token either `user: true` or `admin: true` needs to be set.
 
 The following `rake` tasks are used to generate tokens with 30 days expiry. Tokens from other sources will be accepted as long as they:
-1. Where signed with the same shared secret, and
-2. An [expiry claim](https://tools.ietf.org/html/rfc7519#section-4.1.4) has been made.
+1. Where signed with the same `jwt_shared_secret`, and
+2. Make an [expiry claim](https://tools.ietf.org/html/rfc7519#section-4.1.4).
 
-As the shared secret is environment dependant, the `RACK_ENV` must be set within your environment.
+As this command is dependant on the `jwt_shared_secret`, the `RACK_ENV` must be set within your environment. By default the tokens will expire in 30 days. This can be optionally changed by specifying how long the token should be valid for in days.
 
 ```
 # Set the rack environment
 export RACK_ENV=production
 
-# Generate a user token
+# Generate a user token (Expires in 30 days)
 rake token:user
+
+# Generate a token that expires in 365 days
+rake token:user[365]
 ```
 
 # Contributing

@@ -76,6 +76,14 @@ class Token < Hashie::Trash
     end
   end
 
+  def exp_days=(days)
+    self.exp = days.days.from_now.to_i
+  end
+
+  def exp_days
+    (self.exp - Time.now.to_i)/(24*60*60)
+  end
+
   def token_attributes
     { admin: admin, exp: exp }
   end

@@ -33,6 +33,8 @@ class BaseCommandSerializer
   attributes :action
   attribute(:node_name) { object.id }
   attribute(:platform) { object.platform.name }
+
+  attribute(:missing) { object.node.missing }
 end
 
 class CommandSerializer < BaseCommandSerializer

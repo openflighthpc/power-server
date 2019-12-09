@@ -71,7 +71,7 @@ class Nodes < Hashie::Mash
   end
 
   def [](key)
-    super(key) || Node.new(name: key, attributes: { name: key })
+    super(key) || Node.new(name: key, attributes: { name: key }, missing: true)
   end
 end
 
@@ -79,8 +79,13 @@ class Node < Hashie::Dash
   include Hashie::Extensions::Dash::Coercion
 
   property :name,       required: true
+  property :missing,    default: false
   property :platform,   default: :missing
   property :attributes, required: true, coerce: Hashie::Mash
+
+  def missing?
+    missing
+  end
 end
 
 class Platforms < Hashie::Mash

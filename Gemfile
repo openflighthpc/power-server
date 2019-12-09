@@ -45,8 +45,10 @@ gem 'sinatra'
 gem 'sinatra-contrib'
 
 group :development, :test do
-  gem 'pry'
-  gem 'pry-byebug'
+  group :pry do
+    gem 'pry'
+    gem 'pry-byebug'
+  end
 end
 
 group :test do

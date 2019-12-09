@@ -133,7 +133,9 @@ A basic `systemd` unit file can be found [here](support/power-server.service). T
 The `puma` server daemon can be started manually with:
 
 ```
-bin/puma -p <port> -e production -d
+bin/puma -p <port> -e production -d \
+         --redirect-stdout <stdout-log-file-path> \
+         --redirect-stderr <stderr-log-file-path>
 ```
 
 ## Stopping the Server

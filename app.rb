@@ -37,6 +37,8 @@ NODE_REGEX = /[[:alnum:]]+(\[\d+(-\d+)\])?/
 
 configure do
   set :show_exceptions, :after_handler
+  set :logger, Logger.new($stderr)
+  enable :logging
 end
 
 helpers do
@@ -87,7 +89,7 @@ helpers do
   end
 
   def commands(action)
-    Commands.new(action, nodes).tap(&:run_in_parallel).commands
+    Commands.new(action, nodes).tap { |c| c.run_in_parallel(logger) }.commands
   end
 end
 

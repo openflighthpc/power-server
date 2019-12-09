@@ -65,12 +65,10 @@ task console: :require do
   binding.pry
 end
 
-# task 'token:admin' => :require do
-#   # puts User.new(admin: true).generate_jwt
-#   raise NotImplementedError
-# end
+task('token:admin') { raise NotImplementedError }
 
-task 'token:user' => :require do
-  puts Token.new.generate_jwt
+task 'token:user', [:days] => :require do |task, args|
+  token = Token.new.tap { |t| t.exp_days = args[:days].to_i if args[:days] }
+  puts token.generate_jwt
 end
 

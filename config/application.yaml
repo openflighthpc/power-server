@@ -25,6 +25,3 @@ topology_config:  config/topology.yaml
 # STATIC DEFAULTS:
 num_worker_commands: '50'
 
-development:
-  topology_config: config/topology.example.yaml
-

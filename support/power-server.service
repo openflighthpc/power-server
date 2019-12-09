@@ -11,7 +11,7 @@ WorkingDirectory=/opt/flight/opt/power-server
 
 # The application must be fully configured within the user's environment OR
 # within 'config/application.yaml'
-ExecStart=bin/puma -p 8080 -e production -d \
+ExecStart=bin/puma -p 6302 -e production -d \
                     --redirect-stdout /opt/flight/log/power-server.log \
                     --redirect-stderr /opt/flight/log/power-server.log
 

@@ -41,14 +41,19 @@ Commands = Struct.new(:action, :nodes) do
 
   def run_in_parallel(logger)
     Parallel.each(commands, in_threads: Figaro.env.num_worker_commands.to_i) do |cmd|
-      cmd.capture3
-      cmd.log(logger)
+      if cmd.missing?
+        logger.error "Could not locate node: #{cmd.node.name}"
+      else
+        cmd.log(logger)
+      end
     end
   end
 end
 
 Command = Struct.new(:action, :node) do
   extend Memoist
+
+  delegate :missing?, to: :node
 
   def self.working_dir
     Figaro.env.scripts_dir
@@ -89,12 +94,16 @@ Command = Struct.new(:action, :node) do
   memoize :platform
 
   def capture3
-    Open3.capture3(cmd)
+    if missing?
+      [nil, nil, nil]
+    else
+      Open3.capture3(cmd)
+    end
   end
   memoize :capture3
 
   def exit_code
-    capture3.last.exitstatus
+    capture3.last&.exitstatus
   end
 
   def stdout

@@ -32,6 +32,20 @@ jwt_shared_secret:
 topology_config:
 
 # =============================================================================
+# Remote NodeattrServer [OPTIONAL]
+# Configure the server with an upstream OpenFlightHPC/NodeattrServer. The
+# upstream URL is given by `remote_url`. To prevent conflicts with the
+# topology, this option can not be used with `static_nodes`.
+#
+# The JWT access token should be given as `remote_jwt`. This token may be
+# signed by a different shared secret to this application. For security reasons
+# consider exporting the `remote_jwt` into the environment instead of hard
+# coding it.
+# =============================================================================
+remote_url:
+remote_jwt:
+
+# =============================================================================
 # Scripts Directory
 # Specify the working directory for the commands. This is to allow the commands
 # to call other scripts easily

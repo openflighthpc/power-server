@@ -15,7 +15,13 @@
 # export ... All the other REQUIRED configs ...
 
 # REQUIRED:
-# jwt_shared_secret:  # [REQUIRED]
+# jwt_shared_secret:  # [REQUIRED - Export for enhanced security]
+
+# ENABLE UPSTREAM MODE:
+# Uncomment the remote_url to put the server into upstream mode. This must not
+# be used with static_nodes.
+# remote_url: http://localhost:6301
+# remote_jwt: # [REQUIRED WHEN USING remote_url - Export for enhanced security]
 
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
@@ -26,3 +32,6 @@ scripts_dir:      var/libexec
 # STATIC DEFAULTS:
 num_worker_commands: '50'
 
+development:
+  remote_url:       http://localhost:6301
+  topology_config:  config/topology.example.yaml

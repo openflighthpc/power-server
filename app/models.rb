@@ -39,7 +39,11 @@ class Topology < Hashie::Trash
       delegate_missing_to :cache
 
       def cache
-        @cache ||= Topology.new(SymbolizedMash.load(path))
+        @cache ||= Topology.new(SymbolizedMash.load(path)).tap do |top|
+          if Figaro.env.remote_url
+            top.configure_connection
+          end
+        end
       end
 
       def path
@@ -50,25 +54,30 @@ class Topology < Hashie::Trash
 
   include Hashie::Extensions::Dash::Coercion
 
-  def initialize(*_)
-    super
-    raise <<~ERROR.squish if static_nodes && remote
-      The topology config can not set both the `static_nodes` and `remote`
-      options
-    ERROR
-  end
+  attr_reader :connection
 
   def nodes
-    static_nodes || dynamic_nodes || raise('Could not load the nodes data')
+    if connection
+      dynamic_nodes
+    elsif static_nodes
+      static_nodes
+    else
+      raise 'Could not load the nodes data'
+    end
   end
 
   def dynamic_nodes
-    return nil unless remote
     {}
   end
 
-  # Define the remote nodeattr server
-  property  :remote, coerce: String
+  def configure_connection
+    raise <<~ERROR.squish if static_nodes
+      An upstream OpenFlightHPC/NodeattrServer can not be integrated with
+      static nodes. Please remove the `static_nodes` key from the topology
+      config and try again.
+    ERROR
+    @connection = true
+  end
 
   # Converts the static_nodes hash into StaticNodes object
   property  :static_nodes, coerce: Hash[Symbol => Hash],

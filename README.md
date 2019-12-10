@@ -133,7 +133,7 @@ The node `name` is implicitly set so it can be used as a variable and can not be
 Alternatively a previously configured cluster can be used by specifying the `remote` key in the config. This must not be used with the `static_nodes` to prevent conflicts. This will proxy all the requests `node` parameters to the `nodeattr-server`. If running `nodeattr-server` on localhost with default port configuration:
 
 ```
-remote: https://localhost:6301
+remote: http://localhost:6301
 ```
 
 A typical response from the `nodeattr-server` would be:

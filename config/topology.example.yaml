@@ -27,66 +27,62 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-# Define a static set of Nodes (Can not be used with remote key)
-static_nodes:
-  node01:
-    platform: aws
-    ec2_id: i-node01xxxxxxxxxxx
-    region: eu-west-1
-  node02:
-    platform: aws
-    ec2_id: i-node02xxxxxxxxxxx
-    region: eu-west-1
-  node03:
-    platform: aws
-    ec2_id: i-node03xxxxxxxxxxx
-    region: eu-west-1
-  node04:
-    platform: aws
-    ec2_id: i-node04xxxxxxxxxxx
-    region: eu-west-1
-  node05:
-    platform: aws
-    ec2_id: i-node05xxxxxxxxxxx
-    region: eu-west-1
-  gpu01:
-    platform: azure
-    resource_group: demo-power-group
-  gpu02:
-    platform: azure
-    resource_group: demo-power-group
-  gpu03:
-    platform: azure
-    resource_group: demo-power-group
-  gpu04:
-    platform: azure
-    resource_group: demo-power-group
-  gpu05:
-    platform: azure
-    resource_group: demo-power-group
-  metal01:
-    platform: ipmi
-    ipmi_username: admin
-  metal02:
-    platform: ipmi
-    ipmi_username: admin
-  metal03:
-    platform: ipmi
-    ipmi_username: admin
-  metal04:
-    platform: ipmi
-    ipmi_username: admin
-  metal05:
-    platform: ipmi
-    ipmi_username: admin
-  # This config does not check for missing platforms. Instead missing platforms
-  # will always run 'exit 1' as there commands
-  badnode:
-    platform: missing_platform
-
-# Integrate with OpenFlighHPC/NodeattrServer. This provides full groups support
-# and dynamic node parameters. Can not be used with the `static_nodes` key
-# remote: https://localhost:6301
+# Uncomment to define a static set of nodes (Can not be used in upstream mode)
+# static_nodes:
+#   node01:
+#     platform: aws
+#     ec2_id: i-node01xxxxxxxxxxx
+#     region: eu-west-1
+#   node02:
+#     platform: aws
+#     ec2_id: i-node02xxxxxxxxxxx
+#     region: eu-west-1
+#   node03:
+#     platform: aws
+#     ec2_id: i-node03xxxxxxxxxxx
+#     region: eu-west-1
+#   node04:
+#     platform: aws
+#     ec2_id: i-node04xxxxxxxxxxx
+#     region: eu-west-1
+#   node05:
+#     platform: aws
+#     ec2_id: i-node05xxxxxxxxxxx
+#     region: eu-west-1
+#   gpu01:
+#     platform: azure
+#     resource_group: demo-power-group
+#   gpu02:
+#     platform: azure
+#     resource_group: demo-power-group
+#   gpu03:
+#     platform: azure
+#     resource_group: demo-power-group
+#   gpu04:
+#     platform: azure
+#     resource_group: demo-power-group
+#   gpu05:
+#     platform: azure
+#     resource_group: demo-power-group
+#   metal01:
+#     platform: ipmi
+#     ipmi_username: admin
+#   metal02:
+#     platform: ipmi
+#     ipmi_username: admin
+#   metal03:
+#     platform: ipmi
+#     ipmi_username: admin
+#   metal04:
+#     platform: ipmi
+#     ipmi_username: admin
+#   metal05:
+#     platform: ipmi
+#     ipmi_username: admin
+#   # This config does not check for missing platforms. Instead missing platforms
+#   # will always run 'exit 1' as there commands
+#   badnode:
+#     platform: missing_platform
 
 # Define the platforms here
 platforms:

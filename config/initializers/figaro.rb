@@ -43,7 +43,11 @@ ENV['app_root_dir'] = File.expand_path('../..', __dir__)
 root_dir = ENV['app_root_dir']
 
 relative_keys = ['topology_config', 'scripts_dir']
-Figaro.require_keys('jwt_shared_secret', 'num_worker_commands', *relative_keys)
+Figaro.require_keys(*['jwt_shared_secret',
+                      'num_worker_commands',
+                      *relative_keys].tap do |keys|
+                        keys << 'remote_jwt' if ENV['remote_url']
+                      end)
 
 # Sets relative keys from the install directory
 # NOTE: Does not affect the path if it is already absolute

@@ -41,11 +41,7 @@ class Topology < Hashie::Trash
       def cache
         @cache ||= Topology.new(SymbolizedMash.load(path)).tap do |top|
           if Figaro.env.remote_url
-            top.dynamic_nodes = Nodes::DynamicNodes.new(
-              url: Figaro.env.remote_url,
-              jwt: Figaro.env.remote_jwt,
-              cluster: Figaro.env.remote_cluster
-            )
+            top.dynamic_nodes_cluster = Figaro.env.remote_cluster
           end
         end
       end
@@ -64,13 +60,13 @@ class Topology < Hashie::Trash
     dynamic_nodes || static_nodes || raise('Could not load the nodes data')
   end
 
-  def dynamic_nodes=(nodes)
+  def dynamic_nodes_cluster=(cluster)
     raise <<~ERROR.squish if static_nodes
       An upstream OpenFlightHPC/NodeattrServer can not be integrated with
       static nodes. Please remove the `static_nodes` key from the topology
       config and try again.
     ERROR
-    @dynamic_nodes = nodes
+    @dynamic_nodes = Nodes::DynamicNodes.new(cluster)
   end
 
   # Converts the static_nodes hash into StaticNodes object
@@ -100,14 +96,24 @@ module Nodes
   end
 
   class DynamicNodes < Hashie::Rash
-    MATCH_HASH = {
-      /\A[\w-]+\Z/ => ->(match) do
-        Node.new(name: match.to_s, missing: true)
-      end
-    }
+    attr_reader :__cluster__
 
-    def initialize(url:, jwt:, cluster:)
-      super(MATCH_HASH)
+    def initialize(cluster)
+      @__cluster__ = cluster
+      super({
+        /\A[\w-]+\Z/ => ->(match) do
+          begin
+            record = NodeRecord.find("#{__cluster__}.#{match.to_s}").first
+            Node.new(
+              name: record.name,
+              platform: record.params[:platform],
+              attributes: record.params
+            )
+          rescue JsonApiClient::Errors::NotFound
+            Node.new(name: match.to_s, missing: true)
+          end
+        end
+      })
     end
   end
 end

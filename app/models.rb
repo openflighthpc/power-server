@@ -93,10 +93,23 @@ module Nodes
     def [](key)
       super(key) || Node.new(name: key, missing: true)
     end
+
+    # Dummy method that allows StaticNodes to be used interchangeable DynamicNodes
+    def where_group(_)
+      []
+    end
   end
 
   class DynamicNodes < Hashie::Rash
     attr_reader :__cluster__
+
+    def self.coerce_record(record)
+      Node.new(
+        name: record.name,
+        platform: record.params[:platform],
+        attributes: record.params
+      )
+    end
 
     def initialize(cluster)
       @__cluster__ = cluster
@@ -104,16 +117,22 @@ module Nodes
         /\A[\w-]+\Z/ => ->(match) do
           begin
             record = NodeRecord.find("#{__cluster__}.#{match.to_s}").first
-            Node.new(
-              name: record.name,
-              platform: record.params[:platform],
-              attributes: record.params
-            )
+            self.class.coerce_record(record)
           rescue JsonApiClient::Errors::NotFound
             Node.new(name: match.to_s, missing: true)
           end
         end
       })
+    end
+
+    def where_group(group)
+      begin
+        NodeRecord.where(group_id: "#{__cluster__}.#{group}")
+                  .all
+                  .map { |r| self.class.coerce_record(r) }
+      rescue JsonApiClient::Errors::NotFound
+        []
+      end
     end
   end
 end

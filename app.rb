@@ -77,11 +77,15 @@ helpers do
     end
   end
 
-  def node_names
+  def names_from_nodes_param
     nodes_param.split(',')
                .map { |n| Nodeattr.explode_nodes(n) }
                .flatten
                .uniq
+  end
+
+  def node_names
+    names_from_nodes_param
   end
 
   def nodes

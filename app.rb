@@ -102,6 +102,16 @@ error Pundit::NotAuthorizedError do
   body "Forbidden"
 end
 
+error JsonApiClient::Errors::AccessDenied do
+  status 502
+  body 'Invalid upstream server configuration'
+end
+
+error JsonApiClient::Errors::ConnectionError do
+  status 504
+  body 'Failed to contact the upstream server'
+end
+
 get('/')    { json serialize_models(commands(:status)) }
 patch('/')  { json serialize_models(commands(:power_on)) }
 put('/')    { json serialize_models(commands(:restart)) }

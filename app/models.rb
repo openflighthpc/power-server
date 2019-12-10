@@ -41,7 +41,11 @@ class Topology < Hashie::Trash
       def cache
         @cache ||= Topology.new(SymbolizedMash.load(path)).tap do |top|
           if Figaro.env.remote_url
-            top.configure_connection
+            top.dynamic_nodes = Nodes::DynamicNodes.new(
+              url: Figaro.env.remote_url,
+              jwt: Figaro.env.remote_jwt,
+              cluster: Figaro.env.remote_cluster
+            )
           end
         end
       end
@@ -54,29 +58,19 @@ class Topology < Hashie::Trash
 
   include Hashie::Extensions::Dash::Coercion
 
-  attr_reader :connection
+  attr_reader :dynamic_nodes
 
   def nodes
-    if connection
-      dynamic_nodes
-    elsif static_nodes
-      static_nodes
-    else
-      raise 'Could not load the nodes data'
-    end
+    dynamic_nodes || static_nodes || raise('Could not load the nodes data')
   end
 
-  def dynamic_nodes
-    {}
-  end
-
-  def configure_connection
+  def dynamic_nodes=(nodes)
     raise <<~ERROR.squish if static_nodes
       An upstream OpenFlightHPC/NodeattrServer can not be integrated with
       static nodes. Please remove the `static_nodes` key from the topology
       config and try again.
     ERROR
-    @connection = true
+    @dynamic_nodes = nodes
   end
 
   # Converts the static_nodes hash into StaticNodes object
@@ -101,7 +95,19 @@ module Nodes
     end
 
     def [](key)
-      super(key) || Node.new(name: key, attributes: { name: key }, missing: true)
+      super(key) || Node.new(name: key, missing: true)
+    end
+  end
+
+  class DynamicNodes < Hashie::Rash
+    MATCH_HASH = {
+      /\A[\w-]+\Z/ => ->(match) do
+        Node.new(name: match.to_s, missing: true)
+      end
+    }
+
+    def initialize(url:, jwt:, cluster:)
+      super(MATCH_HASH)
     end
   end
 end
@@ -109,10 +115,15 @@ end
 class Node < Hashie::Dash
   include Hashie::Extensions::Dash::Coercion
 
+  def initialize(*_)
+    super
+    attributes[:name] = name
+  end
+
   property :name,       required: true
   property :missing,    default: false
   property :platform,   default: :missing
-  property :attributes, required: true, coerce: Hashie::Mash
+  property :attributes, default: {}, coerce: Hashie::Mash
 
   def missing?
     missing

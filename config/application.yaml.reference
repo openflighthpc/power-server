@@ -41,9 +41,12 @@ topology_config:
 # signed by a different shared secret to this application. For security reasons
 # consider exporting the `remote_jwt` into the environment instead of hard
 # coding it.
+#
+# The remote_cluster must specify the default cluster the nodes belong to
 # =============================================================================
 remote_url:
 remote_jwt:
+remote_cluster:
 
 # =============================================================================
 # Scripts Directory

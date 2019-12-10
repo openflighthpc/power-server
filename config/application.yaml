@@ -34,4 +34,5 @@ num_worker_commands: '50'
 
 development:
   remote_url:       http://localhost:6301
+  remote_cluster:   default
   topology_config:  config/topology.example.yaml

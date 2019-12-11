@@ -85,8 +85,25 @@ helpers do
                .uniq
   end
 
+  def groups_param
+    if match = NODEATTR_REGEX.match(params[:groups] || '')
+      match.to_s
+    else
+      halt 400, serialize_errors([{ groups: 'Unrecognised groups syntax' }]).to_json
+    end
+  end
+
+  def names_from_groups_param
+    groups_param.split(',')
+                .map { |n| Nodeattr.explode(n) }
+                .flatten
+                .uniq
+  end
+
   def nodes
-    names_from_nodes_param.map { |n| Topology::Cache.nodes[n] }
+    single_nodes = names_from_nodes_param.map { |n| Topology::Cache.nodes[n] }
+    group_nodes = names_from_groups_param.map { |g| Topology::Cache.nodes.where_group(g) }
+    [single_nodes, group_nodes].flatten.uniq
   end
 
   def commands(action)

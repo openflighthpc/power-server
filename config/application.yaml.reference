@@ -63,3 +63,9 @@ scripts_dir:
 # =============================================================================
 num_worker_commands:
 
+# =============================================================================
+# Log Level
+# Specify which level of logging should be used. The supported values are:
+# fatal, error, warn, info, or debug
+# =============================================================================
+log_level:

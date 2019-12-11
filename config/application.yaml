@@ -33,7 +33,12 @@ scripts_dir:      var/libexec
 
 # STATIC DEFAULTS:
 num_worker_commands: '50'
+log_level: info
 
 development:
   remote_url:       http://localhost:6301
   topology_config:  config/topology.example.yaml
+  log_level: debug
+
+test:
+  log_level: error

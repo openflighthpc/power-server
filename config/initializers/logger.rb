@@ -28,13 +28,19 @@
 #===============================================================================
 
 DEFAULT_LOGGER = Logger.new($stdout).tap do |logger|
-  case Sinatra::Application.environment
-  when :production
-    logger.level = Logger::INFO
-  when :test
-    logger.level = Logger::ERROR
+  logger.level = case Figaro.env.log_level.to_s
+  when 'fatal'
+    Logger::FATAL
+  when 'error'
+    Logger::ERROR
+  when 'warn'
+    Logger::WARN
+  when 'info'
+    Logger::INFO
+  when 'debug'
+    Logger::DEBUG
   else
-    logger.level = Logger::DEBUG
+    raise 'Unrecognised log level'
   end
 end
 

@@ -130,11 +130,7 @@ The node `name` is implicitly set so it can be used as a variable and can not be
 
 #### Integrate with OpenFlightHPC:NodeattrServer
 
-Alternatively a previously configured cluster can be used by specifying the `remote` key in the config. This must not be used with the `static_nodes` to prevent conflicts. This will proxy all the requests `node` parameters to the `nodeattr-server`. If running `nodeattr-server` on localhost with default port configuration:
-
-```
-remote: http://localhost:6301
-```
+Alternatively a previously configured cluster can be used by specifying the `remote_url` key in the [core config](config/application/yaml). This must not be used with the `static_nodes` within the `topology`. The `remote_jwt` and `remote_cluster` keys must also be set as as these will be used to proxy `node`/`group` requests to the `nodeattr-server`.
 
 A typical response from the `nodeattr-server` would be:
 
@@ -159,7 +155,7 @@ HTTP/1.1 200 OK
 }
 ```
 
-The `platform` is extracted from the `params` hash and therefore may not be set. In this case a dummy "missing" platform is used which causes all the system commands to fail. All the other `params` are made available as replacements to the bash commands.
+The `platform` is extracted from the `params` hash and therefore may not be set. In this case a dummy "missing" platform is used which causes all the system commands to fail. All the other `params` are made available as replacements to the platform scripts.
 
 ### Setting Up Systemd
 

@@ -18,10 +18,12 @@
 # jwt_shared_secret:  # [REQUIRED - Export for enhanced security]
 
 # ENABLE UPSTREAM MODE:
-# Uncomment the remote_url to put the server into upstream mode. This must not
-# be used with static_nodes.
+# Export the following configs to put the server into upstream mode.
+# Particular care should be taken not to hard set the `remote_jwt` in this
+# config for security reasons.
+remote_cluster: default
+# remote_jwt:
 # remote_url: http://localhost:6301
-# remote_jwt: # [REQUIRED WHEN USING remote_url - Export for enhanced security]
 
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
@@ -34,5 +36,4 @@ num_worker_commands: '50'
 
 development:
   remote_url:       http://localhost:6301
-  remote_cluster:   default
   topology_config:  config/topology.example.yaml

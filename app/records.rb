@@ -27,34 +27,30 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-source "https://rubygems.org"
+require 'json_api_client'
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem 'activesupport'
-gem 'figaro'
-gem 'hashie'
-gem 'json_api_client'
-gem 'jsonapi-serializers'
-gem 'jwt'
-gem 'memoist'
-gem 'parallel'
-gem 'puma'
-gem 'rake'
-gem 'pundit'
-gem 'sinatra'
-gem 'sinatra-contrib'
-
-group :development, :test do
-  group :pry do
-    gem 'pry'
-    gem 'pry-byebug'
+class Record < JsonApiClient::Resource
+  self.site = Figaro.env.remote_url
+  self.connection.faraday.authorization :Bearer, Figaro.env.remote_jwt
+  connection.use Faraday::Response::Logger, DEFAULT_LOGGER do |logger|
+    logger.filter(/(Authorization: "Bearer )(.*)"/, '\1[REDACTED]"')
   end
 end
 
-group :test do
-	gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
+class NodeRecord < Record
+  def self.resource_name
+    'nodes'
+  end
+
+  belongs_to :group, class_name: 'GroupRecord', shallow_path: true
+
+  property :name, type: :string
+  property :params, type: :hash
+end
+
+class GroupRecord < Record
+  def self.resource_name
+    'groups'
+  end
 end
 

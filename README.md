@@ -50,9 +50,9 @@ export jwt_shared_secret=<keep-this-secret-safe>
 vim config/application.yaml
 ```
 
-### Adding Nodes And Platforms
+### Configuring the Platform
 
-The layout of the cluster is specified in the topology config file which is stored as `config/topology.yaml` by default. It must specify the `nodes` and `platforms` key.
+The layout of the cluster is specified in the topology config file which is stored as `config/topology.yaml` by default.
 
 #### Getting Started
 
@@ -64,7 +64,7 @@ needs to be copied into place:
 cp config/topology.example.yaml config/topology.yaml
 ```
 
-All further actions will be preformed on `config/topology.yaml`. A basic list of `nodes` has been provided with this config. It is now safe to remove them.
+All further actions will be preformed on `config/topology.yaml`. A basic list of `static_nodes` have been provided with this config. It is now safe to remove them.
 
 #### Adding a Platform
 
@@ -95,9 +95,13 @@ NOTE: `Starting` and `Stopping` States
 
 The API only supports nodes in `on` or `off` power states. Transitionary states (such as `starting`/`stopping`) are not supported and can not be communicated through the API. In these cases, the `status` script should return a failure exit code but may return either 0 or `status_off_exit_code`. There is no preference for the last known state versus the likely future state.
 
-#### Adding the Nodes
+### Configuring the Nodes
 
-The `nodes` are also set within the `topology` config and are used to customise the bash commands. The generic layouts is:
+There are two ways the nodes can be specified within the `topology`, as a static list or dynamically by integrating with [nodeattr-server](https://github.com/openflighthpc/nodeattr-server).
+
+#### Static Nodes
+
+To statically define the nodes, the `static_nodes` key must be set within the topography config. To prevent conflicts with an upstream server, the `remote` key must not be set. Each node's parameters are used to customise the bash commands. The generic layout is:
 
 ```
 nodes:
@@ -123,6 +127,35 @@ nodes:
 The variables specified on the platform will preform a lookup against the nodes. This is primarily used to set some form of node identifier bash variable (e.g. `$ec2_id`) in the script. The exact keys depends on the `platform` configuration.
 
 The node `name` is implicitly set so it can be used as a variable and can not be overridden.
+
+#### Integrate with OpenFlightHPC:NodeattrServer
+
+Alternatively a previously configured cluster can be used by specifying the `remote_url` key in the [core config](config/application/yaml). This must not be used with the `static_nodes` within the `topology`. The `remote_jwt` and `remote_cluster` keys must also be set as as these will be used to proxy `node`/`group` requests to the `nodeattr-server`.
+
+A typical response from the `nodeattr-server` would be:
+
+```
+GET /nodes/foo-cluster.bar
+
+HTTP/1.1 200 OK
+{
+  "data": {
+    "type": "nodes",
+    "id": "<id>",
+    "attributes": {
+      "name": "bar",
+      "params": {
+        "platform": "<platfrom>",
+        ... other parameters ...
+      }
+    },
+    ...
+  },
+  ...
+}
+```
+
+The `platform` is extracted from the `params` hash and therefore may not be set. In this case a dummy "missing" platform is used which causes all the system commands to fail. All the other `params` are made available as replacements to the platform scripts.
 
 ### Setting Up Systemd
 

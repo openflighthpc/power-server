@@ -27,34 +27,20 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-source "https://rubygems.org"
-
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem 'activesupport'
-gem 'figaro'
-gem 'hashie'
-gem 'json_api_client'
-gem 'jsonapi-serializers'
-gem 'jwt'
-gem 'memoist'
-gem 'parallel'
-gem 'puma'
-gem 'rake'
-gem 'pundit'
-gem 'sinatra'
-gem 'sinatra-contrib'
-
-group :development, :test do
-  group :pry do
-    gem 'pry'
-    gem 'pry-byebug'
+DEFAULT_LOGGER = Logger.new($stdout).tap do |logger|
+  logger.level = case Figaro.env.log_level.to_s
+  when 'fatal'
+    Logger::FATAL
+  when 'error'
+    Logger::ERROR
+  when 'warn'
+    Logger::WARN
+  when 'info'
+    Logger::INFO
+  when 'debug'
+    Logger::DEBUG
+  else
+    raise 'Unrecognised log level'
   end
-end
-
-group :test do
-	gem 'rack-test'
-  gem 'rspec'
-  gem 'rspec-collection_matchers'
 end
 

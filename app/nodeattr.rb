@@ -27,9 +27,9 @@
 # https://raw.githubusercontent.com/DougEverly/nodeattr/34f55c95a875ee478c24359b090b37ffdb8d4214/lib/nodeattr.rb
 
 module Nodeattr
-  def self.explode_nodes(nodes)
+  def self.explode(names)
     h = Array.new
-    m = nodes.match(/^(.*)\[(.*)\]$/)
+    m = names.match(/^(.*)\[(.*)\]$/)
     if m
       base = m[1]
       instances = m[2].split(',')
@@ -46,7 +46,7 @@ module Nodeattr
         end
       end
     else
-      h << nodes
+      h << names
     end
     h
   end

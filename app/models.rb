@@ -39,7 +39,11 @@ class Topology < Hashie::Trash
       delegate_missing_to :cache
 
       def cache
-        @cache ||= Topology.new(SymbolizedMash.load(path))
+        @cache ||= Topology.new(SymbolizedMash.load(path)).tap do |top|
+          if Figaro.env.remote_url
+            top.dynamic_nodes_cluster = Figaro.env.remote_cluster
+          end
+        end
       end
 
       def path
@@ -50,38 +54,101 @@ class Topology < Hashie::Trash
 
   include Hashie::Extensions::Dash::Coercion
 
-  # Converts the nodes hash into Node objects
-  property  :nodes, required: true, coerce: Hash[Symbol => Hash],
-            transform_with: ->(h) { Nodes.new(h) }
+  attr_reader :dynamic_nodes
+
+  def nodes
+    dynamic_nodes || static_nodes || raise('Could not load the nodes data')
+  end
+
+  def dynamic_nodes_cluster=(cluster)
+    raise <<~ERROR.squish if static_nodes
+      An upstream OpenFlightHPC/NodeattrServer can not be integrated with
+      static nodes. Please remove the `static_nodes` key from the topology
+      config and try again.
+    ERROR
+    @dynamic_nodes = Nodes::DynamicNodes.new(cluster)
+  end
+
+  # Converts the static_nodes hash into StaticNodes object
+  property  :static_nodes, coerce: Hash[Symbol => Hash],
+            transform_with: ->(h) { Nodes::StaticNodes.new(h) }
 
   # Converts the platform hash into Platform Objects
   property  :platforms, required: true, coerce: Hash[Symbol => Hash],
             transform_with: ->(h) { Platforms.new(h) }
 end
 
-class Nodes < Hashie::Mash
-  def initialize(**node_hash)
-    nodes = node_hash.map do |name, attr|
-      node = Node.new name: name,
-                      platform: attr.delete(:platform),
-                      attributes: attr.merge(name: name)
-      [name, node]
+module Nodes
+  class StaticNodes < Hashie::Mash
+    def initialize(**node_hash)
+      nodes = node_hash.map do |name, attr|
+        node = Node.new name: name,
+                        platform: attr.delete(:platform),
+                        attributes: attr.merge(name: name)
+        [name, node]
+      end
+      super(nodes.to_h)
     end
-    super(nodes.to_h)
+
+    def [](key)
+      super(key) || Node.new(name: key, missing: true)
+    end
+
+    # Dummy method that allows StaticNodes to be used interchangeable DynamicNodes
+    def where_group(_)
+      []
+    end
   end
 
-  def [](key)
-    super(key) || Node.new(name: key, attributes: { name: key }, missing: true)
+  class DynamicNodes < Hashie::Rash
+    attr_reader :__cluster__
+
+    def self.coerce_record(record)
+      Node.new(
+        name: record.name,
+        platform: record.params[:platform],
+        attributes: record.params
+      )
+    end
+
+    def initialize(cluster)
+      @__cluster__ = cluster
+      super({
+        /\A[\w-]+\Z/ => ->(match) do
+          begin
+            record = NodeRecord.find("#{__cluster__}.#{match.to_s}").first
+            self.class.coerce_record(record)
+          rescue JsonApiClient::Errors::NotFound
+            Node.new(name: match.to_s, missing: true)
+          end
+        end
+      })
+    end
+
+    def where_group(group)
+      begin
+        NodeRecord.where(group_id: "#{__cluster__}.#{group}")
+                  .all
+                  .map { |r| self.class.coerce_record(r) }
+      rescue JsonApiClient::Errors::NotFound
+        []
+      end
+    end
   end
 end
 
 class Node < Hashie::Dash
   include Hashie::Extensions::Dash::Coercion
 
+  def initialize(*_)
+    super
+    attributes[:name] = name
+  end
+
   property :name,       required: true
   property :missing,    default: false
   property :platform,   default: :missing
-  property :attributes, required: true, coerce: Hashie::Mash
+  property :attributes, default: {}, coerce: Hashie::Mash
 
   def missing?
     missing

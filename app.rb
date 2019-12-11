@@ -32,12 +32,13 @@ require 'jsonapi-serializers'
 require 'sinatra'
 require "sinatra/json"
 
-BEARER_REGEX = /\ABearer\s(?<token>.*)\Z/
-NODE_REGEX = /[[:alnum:]]+(\[\d+(-\d+)\])?/
+BEARER_REGEX    = /\ABearer\s(?<token>.*)\Z/
+SINGLE_REGEX    = /[[:alnum:]]+(\[\d+(-\d+)\])?/
+NODEATTR_REGEX  = /\A(#{SINGLE_REGEX}(,#{SINGLE_REGEX})*)?\Z/
 
 configure do
   set :show_exceptions, :after_handler
-  set :logger, Logger.new($stderr)
+  set :logger, DEFAULT_LOGGER
   enable :logging
 end
 
@@ -70,22 +71,39 @@ helpers do
   end
 
   def nodes_param
-    if /\A#{NODE_REGEX}(,#{NODE_REGEX})*\Z/.match? params[:nodes]
-      params[:nodes]
+    if match = NODEATTR_REGEX.match(params[:nodes] || '')
+      match.to_s
     else
       halt 400, serialize_errors([{ nodes: 'Unrecognised nodes syntax' }]).to_json
     end
   end
 
-  def node_names
+  def names_from_nodes_param
     nodes_param.split(',')
-               .map { |n| Nodeattr.explode_nodes(n) }
+               .map { |n| Nodeattr.explode(n) }
                .flatten
                .uniq
   end
 
+  def groups_param
+    if match = NODEATTR_REGEX.match(params[:groups] || '')
+      match.to_s
+    else
+      halt 400, serialize_errors([{ groups: 'Unrecognised groups syntax' }]).to_json
+    end
+  end
+
+  def names_from_groups_param
+    groups_param.split(',')
+                .map { |n| Nodeattr.explode(n) }
+                .flatten
+                .uniq
+  end
+
   def nodes
-    node_names.map { |n| Topology::Cache.nodes[n] }
+    single_nodes = names_from_nodes_param.map { |n| Topology::Cache.nodes[n] }
+    group_nodes = names_from_groups_param.map { |g| Topology::Cache.nodes.where_group(g) }
+    [single_nodes, group_nodes].flatten.uniq
   end
 
   def commands(action)
@@ -100,6 +118,16 @@ end
 error Pundit::NotAuthorizedError do
   status 403
   body "Forbidden"
+end
+
+error JsonApiClient::Errors::AccessDenied do
+  status 502
+  body 'Invalid upstream server configuration'
+end
+
+error JsonApiClient::Errors::ConnectionError do
+  status 504
+  body 'Failed to contact the upstream server'
 end
 
 get('/')    { json serialize_models(commands(:status)) }

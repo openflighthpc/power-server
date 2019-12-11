@@ -32,8 +32,9 @@ require 'jsonapi-serializers'
 require 'sinatra'
 require "sinatra/json"
 
-BEARER_REGEX = /\ABearer\s(?<token>.*)\Z/
-NODE_REGEX = /[[:alnum:]]+(\[\d+(-\d+)\])?/
+BEARER_REGEX    = /\ABearer\s(?<token>.*)\Z/
+SINGLE_REGEX    = /[[:alnum:]]+(\[\d+(-\d+)\])?/
+NODEATTR_REGEX  = /\A(#{SINGLE_REGEX}(,#{SINGLE_REGEX})*)?\Z/
 
 configure do
   set :show_exceptions, :after_handler
@@ -70,8 +71,8 @@ helpers do
   end
 
   def nodes_param
-    if /\A#{NODE_REGEX}(,#{NODE_REGEX})*\Z/.match? params[:nodes]
-      params[:nodes]
+    if match = NODEATTR_REGEX.match(params[:nodes] || '')
+      match.to_s
     else
       halt 400, serialize_errors([{ nodes: 'Unrecognised nodes syntax' }]).to_json
     end
@@ -79,17 +80,13 @@ helpers do
 
   def names_from_nodes_param
     nodes_param.split(',')
-               .map { |n| Nodeattr.explode_nodes(n) }
+               .map { |n| Nodeattr.explode(n) }
                .flatten
                .uniq
   end
 
-  def node_names
-    names_from_nodes_param
-  end
-
   def nodes
-    node_names.map { |n| Topology::Cache.nodes[n] }
+    names_from_nodes_param.map { |n| Topology::Cache.nodes[n] }
   end
 
   def commands(action)

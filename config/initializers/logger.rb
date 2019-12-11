@@ -27,30 +27,14 @@
 # https://github.com/openflighthpc/power-server
 #===============================================================================
 
-require 'json_api_client'
-
-class Record < JsonApiClient::Resource
-  self.site = Figaro.env.remote_url
-  self.connection.faraday.authorization :Bearer, Figaro.env.remote_jwt
-  connection.use Faraday::Response::Logger, DEFAULT_LOGGER do |logger|
-    logger.filter(/(Authorization: "Bearer )(.*)"/, '\1[REDACTED]"')
-  end
-end
-
-class NodeRecord < Record
-  def self.resource_name
-    'nodes'
-  end
-
-  belongs_to :group, class_name: 'GroupRecord', shallow_path: true
-
-  property :name, type: :string
-  property :params, type: :hash
-end
-
-class GroupRecord < Record
-  def self.resource_name
-    'groups'
+DEFAULT_LOGGER = Logger.new($stdout).tap do |logger|
+  case Sinatra::Application.environment
+  when :production
+    logger.level = Logger::INFO
+  when :test
+    logger.level = Logger::ERROR
+  else
+    logger.level = Logger::DEBUG
   end
 end
 

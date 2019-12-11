@@ -38,7 +38,7 @@ NODEATTR_REGEX  = /\A(#{SINGLE_REGEX}(,#{SINGLE_REGEX})*)?\Z/
 
 configure do
   set :show_exceptions, :after_handler
-  set :logger, Logger.new($stderr)
+  set :logger, DEFAULT_LOGGER
   enable :logging
 end
 

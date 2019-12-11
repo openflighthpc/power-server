@@ -43,14 +43,12 @@ task :require_bundler do
   ERROR
 
   Bundler.require(:default, ENV['RACK_ENV'].to_sym)
-
-  # Turns FakeFS off if running in test mode. The gem isn't installed in production
-  FakeFS.deactivate! if ENV['RACK_ENV'] == 'test'
 end
 
 task require: :require_bundler do
   require 'config/initializers/active_support'
   require 'config/initializers/figaro'
+  require 'config/initializers/logger'
   require 'app/nodeattr'
   require 'app/token'
   require 'app/command'

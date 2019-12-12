@@ -92,6 +92,10 @@ get('/nodes') do
   json serialize_models(Topology::Cache.nodes.to_a)
 end
 
+get('/groups') do
+  json serialize_models(Topology::Cache.nodes.all_groups)
+end
+
 namespace '/' do
   helpers do
     def nodes_param

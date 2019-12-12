@@ -99,6 +99,10 @@ module Nodes
       []
     end
 
+    def all_groups
+      []
+    end
+
     # Return the Nodes so they can be serialized
     def to_a
       values
@@ -143,6 +147,10 @@ module Nodes
     # Fetch the available upstream nodes
     def to_a
       NodeRecord.where(cluster_id: ".#{__cluster__}").all.map { |r| self.class.coerce_record(r) }
+    end
+
+    def all_groups
+      GroupRecord.where(cluster_id: ".#{__cluster__}").all
     end
   end
 end

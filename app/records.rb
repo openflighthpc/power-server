@@ -63,6 +63,16 @@ class GroupRecord < Record
   def self.resource_name
     'groups'
   end
+
+  def id
+    name
+  end
+
+  def type
+    self.class.resource_name
+  end
+
+  belongs_to :cluster, class_name: 'ClusterRecord', shallow_path: true
 end
 
 class ClusterRecord < Record

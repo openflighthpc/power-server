@@ -58,3 +58,9 @@ class NodeSerializer
   attribute(:name)
 end
 
+class GroupRecordSerializer
+  include JSONAPI::Serializer
+
+  attribute(:name)
+end
+

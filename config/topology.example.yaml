@@ -96,7 +96,7 @@ platforms:
       if echo "$output" | grep on; then
         exit 0
       elif echo "$output" | grep off; then
-        exit 255
+        exit 111
       else
         exit 1
       fi
@@ -106,7 +106,7 @@ platforms:
     power_on: aws ec2 start-instances --instance-ids "$ec2_id" --region "$region"
     power_off: aws ec2 stop-instances --instance-ids "$ec2_id" --region "$region"
     restart: aws ec2 reboot-instances --instance-ids "$ec2_id" --region "$region"
-    status_off_exit_code: 123 # Default: 255
+    status_off_exit_code: 123 # Default: 111
     status: |-
       status=$(aws ec2 describe-instances --instance-ids "$ec2_id" \
                                           --region "$region" \
@@ -128,7 +128,7 @@ platforms:
     power_on: az vm start --resource-group "$resource_group" --name "$name"
     power_off: az vm stop --resource-group "$resource_group" --name "$name"
     restart: az vm restart --resource-group "$resource_group" --name "$name"
-    # status_off_exit_code: 255
+    # status_off_exit_code: 111
     status: |-
       status=$(az vm get-instance-view --resource-group "$resource_group" \
                                        --name "$name" \
@@ -138,7 +138,7 @@ platforms:
           exit 0
           ;;
         \"PowerState/stopped\")
-          exit 255
+          exit 111
           ;;
         *)
           exit 1

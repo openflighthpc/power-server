@@ -42,7 +42,18 @@ class NodeRecord < Record
     'nodes'
   end
 
+  # Fix a bug where multiple `belongs_to` will start interacting with each other
+  # and royally mangle the path. `nil` sections of the path need to be rejected first
+  def self._set_prefix_path(attrs)
+    paths = _belongs_to_associations.map do |a|
+      a.set_prefix_path(attrs, route_formatter)
+    end
+
+    paths.reject(&:nil?).join("/")
+  end
+
   belongs_to :group, class_name: 'GroupRecord', shallow_path: true
+  belongs_to :cluster, class_name: 'ClusterRecord', shallow_path: true
 
   property :name, type: :string
   property :params, type: :hash
@@ -51,6 +62,12 @@ end
 class GroupRecord < Record
   def self.resource_name
     'groups'
+  end
+end
+
+class ClusterRecord < Record
+  def self.resource_name
+    'clusters'
   end
 end
 

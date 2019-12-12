@@ -52,3 +52,9 @@ class StatusCommandSerializer < BaseCommandSerializer
   end
 end
 
+class NodeSerializer
+  include JSONAPI::Serializer
+
+  attribute(:name)
+end
+

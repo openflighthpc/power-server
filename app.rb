@@ -87,6 +87,11 @@ before do
   authorize :command, :valid?
 end
 
+# Basic get methods to list the available nodes/groups that service can manage
+get('/nodes') do
+  json serialize_models(Topology::Cache.nodes.to_a)
+end
+
 namespace '/' do
   helpers do
     def nodes_param

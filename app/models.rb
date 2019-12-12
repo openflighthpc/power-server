@@ -98,6 +98,11 @@ module Nodes
     def where_group(_)
       []
     end
+
+    # Return the Nodes so they can be serialized
+    def to_a
+      values
+    end
   end
 
   class DynamicNodes < Hashie::Rash
@@ -134,6 +139,11 @@ module Nodes
         []
       end
     end
+
+    # Fetch the available upstream nodes
+    def to_a
+      NodeRecord.where(cluster_id: ".#{__cluster__}").all.map { |r| self.class.coerce_record(r) }
+    end
   end
 end
 
@@ -149,6 +159,10 @@ class Node < Hashie::Dash
   property :missing,    default: false
   property :platform,   default: :missing
   property :attributes, default: {}, coerce: Hashie::Mash
+
+  def id
+    name
+  end
 
   def missing?
     missing

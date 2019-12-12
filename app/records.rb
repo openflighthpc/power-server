@@ -32,7 +32,7 @@ require 'json_api_client'
 class Record < JsonApiClient::Resource
   self.site = Figaro.env.remote_url
   self.connection.faraday.authorization :Bearer, Figaro.env.remote_jwt
-  connection.use Faraday::Response::Logger, DEFAULT_LOGGER do |logger|
+  connection.use Faraday::Response::Logger, DEFAULT_LOGGER, { bodies: true } do |logger|
     logger.filter(/(Authorization: "Bearer )(.*)"/, '\1[REDACTED]"')
   end
 end

@@ -52,3 +52,24 @@ class StatusCommandSerializer < BaseCommandSerializer
   end
 end
 
+class NodeSerializer
+  include JSONAPI::Serializer
+
+  attributes :name
+end
+
+class GroupRecordSerializer
+  include JSONAPI::Serializer
+
+  def id
+    object.name
+  end
+
+  def type
+    'groups'
+  end
+
+  attributes :name
+  attribute(:nodes) { object.nodes.map(&:name) }
+end
+

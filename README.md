@@ -80,7 +80,7 @@ platforms:
     power_off: '' # String specifying the power off bash command
     restart: ''   # String specifying the restart bash command
     status: ''    # String specifying the status bash command
-    status_off_exit_code: 255 # [Optional] Specify the off exit code
+    status_off_exit_code: 111 # [Optional] Specify the off exit code
 ```
 
 The majority of the above parameters give scripts to be ran when the relevant end point is hit. These are bash scripts that executed within the environment the server was started in. It is therefore possible to store the relevant credentials within the environment to prevent hard coding them in a config.
@@ -89,7 +89,7 @@ The `variables` parameter is used to customise the command on a per node basis. 
 
 API requests will always respond with a `success` boolean value based on the exit code of the script. An exit value of 0 is considered a successful request. To prevent the client applications from hanging, the scripts may choose to exit 0 before the action has fully completed. This means successful response only indicate the action was submitted correctly NOT that it has completed correctly. All non zero exit codes are considered failures with the following exception.
 
-The `status` command has two exit codes that are considered "successes", 0 and `status_off_exit_code`. An exit code of 0 must be returned if the node is currently running. The `status_off_exit_code` defaults to 255 and must be returned if the node is offline. All other exit codes are failures and the state of the node is undetermined.
+The `status` command has two exit codes that are considered "successes", 0 and `status_off_exit_code`. An exit code of 0 must be returned if the node is currently running. The `status_off_exit_code` defaults to 111 and must be returned if the node is offline. All other exit codes are failures and the state of the node is undetermined.
 
 NOTE: `Starting` and `Stopping` States
 

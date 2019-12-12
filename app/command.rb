@@ -83,7 +83,12 @@ Command = Struct.new(:action, :node) do
       #{args}
 
       # Run: #{node.platform}:#{action}
-      #{platform[action]}
+      #{
+        [
+          (action == :status ? "# Off Exit Code: #{platform.status_off_exit_code}" : nil),
+          platform[action]
+        ].reject(&:nil?).join("\n")
+      }
     CMD
   end
   memoize :cmd

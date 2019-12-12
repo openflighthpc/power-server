@@ -31,6 +31,7 @@ require 'json'
 require 'jsonapi-serializers'
 require 'sinatra'
 require "sinatra/json"
+require "sinatra/namespace"
 
 BEARER_REGEX    = /\ABearer\s(?<token>.*)\Z/
 SINGLE_REGEX    = /[[:alnum:]]+(\[\d+(-\d+)\])?/
@@ -65,54 +66,6 @@ helpers do
       result['data'].each { |model| model.delete('links') }
     end
   end
-
-  def serialize_errors(errors)
-    JSONAPI::Serializer.serialize_errors(errors)
-  end
-
-  def nodes_param
-    if match = NODEATTR_REGEX.match(params[:nodes] || '')
-      match.to_s
-    else
-      halt 400, serialize_errors([{ nodes: 'Unrecognised nodes syntax' }]).to_json
-    end
-  end
-
-  def names_from_nodes_param
-    nodes_param.split(',')
-               .map { |n| Nodeattr.explode(n) }
-               .flatten
-               .uniq
-  end
-
-  def groups_param
-    if match = NODEATTR_REGEX.match(params[:groups] || '')
-      match.to_s
-    else
-      halt 400, serialize_errors([{ groups: 'Unrecognised groups syntax' }]).to_json
-    end
-  end
-
-  def names_from_groups_param
-    groups_param.split(',')
-                .map { |n| Nodeattr.explode(n) }
-                .flatten
-                .uniq
-  end
-
-  def nodes
-    single_nodes = names_from_nodes_param.map { |n| Topology::Cache.nodes[n] }
-    group_nodes = names_from_groups_param.map { |g| Topology::Cache.nodes.where_group(g) }
-    [single_nodes, group_nodes].flatten.uniq
-  end
-
-  def commands(action)
-    Commands.new(action, nodes).tap { |c| c.run_in_parallel(logger) }.commands
-  end
-end
-
-before do
-  authorize :command, :valid?
 end
 
 error Pundit::NotAuthorizedError do
@@ -130,8 +83,56 @@ error JsonApiClient::Errors::ConnectionError do
   body 'Failed to contact the upstream server'
 end
 
-get('/')    { json serialize_models(commands(:status)) }
-patch('/')  { json serialize_models(commands(:power_on)) }
-put('/')    { json serialize_models(commands(:restart)) }
-delete('/') { json serialize_models(commands(:power_off)) }
+before do
+  authorize :command, :valid?
+end
+
+namespace '/' do
+  helpers do
+    def nodes_param
+      if match = NODEATTR_REGEX.match(params[:nodes] || '')
+        match.to_s
+      else
+        halt 400, 'Unrecognised nodes syntax'
+      end
+    end
+
+    def names_from_nodes_param
+      nodes_param.split(',')
+                 .map { |n| Nodeattr.explode(n) }
+                 .flatten
+                 .uniq
+    end
+
+    def groups_param
+      if match = NODEATTR_REGEX.match(params[:groups] || '')
+        match.to_s
+      else
+        halt 400, 'Unrecognised groups syntax'
+      end
+    end
+
+    def names_from_groups_param
+      groups_param.split(',')
+                  .map { |n| Nodeattr.explode(n) }
+                  .flatten
+                  .uniq
+    end
+
+    def nodes
+      single_nodes = names_from_nodes_param.map { |n| Topology::Cache.nodes[n] }
+      group_nodes = names_from_groups_param.map { |g| Topology::Cache.nodes.where_group(g) }
+      [single_nodes, group_nodes].flatten.uniq
+    end
+
+    def commands(action)
+      Commands.new(action, nodes).tap { |c| c.run_in_parallel(logger) }.commands
+    end
+  end
+
+  get     { json serialize_models(commands(:status)) }
+  patch   { json serialize_models(commands(:power_on)) }
+  put     { json serialize_models(commands(:restart)) }
+  delete  { json serialize_models(commands(:power_off)) }
+end
 

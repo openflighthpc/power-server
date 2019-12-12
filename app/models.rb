@@ -150,7 +150,7 @@ module Nodes
     end
 
     def all_groups
-      GroupRecord.where(cluster_id: ".#{__cluster__}").all
+      GroupRecord.includes(:nodes).where(cluster_id: ".#{__cluster__}").all
     end
   end
 end

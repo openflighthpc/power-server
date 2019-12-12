@@ -55,12 +55,21 @@ end
 class NodeSerializer
   include JSONAPI::Serializer
 
-  attribute(:name)
+  attributes :name
 end
 
 class GroupRecordSerializer
   include JSONAPI::Serializer
 
-  attribute(:name)
+  def id
+    object.name
+  end
+
+  def type
+    'groups'
+  end
+
+  attributes :name
+  attribute(:nodes) { object.nodes.map(&:name) }
 end
 

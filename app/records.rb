@@ -35,13 +35,15 @@ class Record < JsonApiClient::Resource
   connection.use Faraday::Response::Logger, DEFAULT_LOGGER, { bodies: true } do |logger|
     logger.filter(/(Authorization:)(.*)/, '\1 [REDACTED]')
   end
+
+  def self.inherited(klass)
+    type = klass.resource_name.chomp('_record').pluralize
+    Record.class_exec { resolve_custom_type type, klass.to_s }
+    klass.define_singleton_method(:resource_name) { type }
+  end
 end
 
 class NodeRecord < Record
-  def self.resource_name
-    'nodes'
-  end
-
   # Fix a bug where multiple `belongs_to` will start interacting with each other
   # and royally mangle the path. `nil` sections of the path need to be rejected first
   def self._set_prefix_path(attrs)
@@ -60,24 +62,11 @@ class NodeRecord < Record
 end
 
 class GroupRecord < Record
-  def self.resource_name
-    'groups'
-  end
-
-  def id
-    name
-  end
-
-  def type
-    self.class.resource_name
-  end
+  has_many :nodes, class_name: 'NodeRecord'
 
   belongs_to :cluster, class_name: 'ClusterRecord', shallow_path: true
 end
 
 class ClusterRecord < Record
-  def self.resource_name
-    'clusters'
-  end
 end
 

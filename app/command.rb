@@ -30,6 +30,7 @@
 require 'open3'
 require 'memoist'
 require 'parallel'
+require 'shellwords'
 
 Commands = Struct.new(:action, :nodes) do
   extend Memoist
@@ -73,8 +74,9 @@ Command = Struct.new(:action, :node) do
 
   def cmd
     args = platform.variables
-                   .map { |v| "#{v}=\"#{node.attributes[v]}\"" }
-                   .join("\n")
+                   .map do |v|
+                     "#{v}=\"#{Shellwords.escape(node.attributes[v])}\""
+                   end.join("\n")
     <<~CMD
       # Working Directory:
       cd #{self.class.working_dir}

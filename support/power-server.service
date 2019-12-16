@@ -1,6 +1,7 @@
 [Unit]
 Description=Flight Power Server
 Requires=network.target
+Wants=nodeattr-server.service
 
 [Service]
 Type=forking

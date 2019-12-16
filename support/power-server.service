@@ -1,20 +1,22 @@
 [Unit]
 Description=Flight Power Server
 Requires=network.target
+Wants=nodeattr-server.service
 
 [Service]
-Type=simple
+Type=forking
 User=root
-
-# The working directory needs to be where the application has been installed
+PIDFile=/opt/flight/opt/power-server/var/puma.pid
+Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/flight/bin
+EnvironmentFile=/opt/flight/etc/power-server.conf
 WorkingDirectory=/opt/flight/opt/power-server
-
-# The application must be fully configured within the user's environment OR
-# within 'config/application.yaml'
-ExecStart=bin/puma -p 6302 -e production \
-                    --redirect-stdout /opt/flight/log/power-server.log \
-                    --redirect-stderr /opt/flight/log/power-server.log
-
+ExecStart=/bin/sh -c ' \
+  bin/puma -d -e production \
+    --redirect-append \
+    --redirect-stdout /opt/flight/log/power-server.log \
+    --redirect-stderr /opt/flight/log/power-server.log \
+'
+ExecStop=/opt/flight/opt/power-server/bin/pumactl stop
 Restart=always
 
 [Install]

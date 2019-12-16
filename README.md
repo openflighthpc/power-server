@@ -157,9 +157,18 @@ HTTP/1.1 200 OK
 
 The `platform` is extracted from the `params` hash and therefore may not be set. In this case a dummy "missing" platform is used which causes all the system commands to fail. All the other `params` are made available as replacements to the platform scripts.
 
-### Setting Up Systemd
+### Integrating with OpenFlightHPC/FlightRunway
 
-A basic `systemd` unit file can be found [here](support/power-server.service). The unit file will need to be tweaked according to where the application has been installed/configured. The unit needs to be stored within `/etc/systemd/system`.
+The [provided systemd unit file](support/power-server.service) has been designed to integrate with the `OpenFlightHPC` [flight-runway](https://github.com/openflighthpc/flight-runway) package. The following preconditions must be satisfied for the unit file to work:
+1. `OpenFlightHPC` `flight-runway` must be installed,
+2. The server must be installed as `/otp/flight/opt/power-server`,
+3. The log directory must exist: `/opt/flight/log`, and
+4. The configuration file must exist: `/opt/flight/etc/power-server.conf`.
+
+The configuration file will be loaded into the environment by `systemd` and can be used to override values within `config/application.yaml`. This is the recommended way to set the custom configuration values and provides the following benefits:
+1. The config will be preserved on update,
+2. It keeps the secret keys separate from the code base, and
+3. It eliminates the need to source a `bashrc` in order to setup the environment.
 
 ## Starting the Server
 
@@ -167,6 +176,7 @@ The `puma` server daemon can be started manually with:
 
 ```
 bin/puma -p <port> -e production -d \
+         --redirect-append \
          --redirect-stdout <stdout-log-file-path> \
          --redirect-stderr <stderr-log-file-path>
 ```

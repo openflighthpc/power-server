@@ -191,13 +191,15 @@ kill -s SIGINT <puma-pid>
 
 ## Authentication
 
-The API requires all requests to carry with a [jwt](https://jwt.io). Within the token either `user: true` or `admin: true` needs to be set.
+The API requires all requests to carry with a [jwt](https://jwt.io).
 
 The following `rake` tasks are used to generate tokens with 30 days expiry. Tokens from other sources will be accepted as long as they:
 1. Where signed with the same `jwt_shared_secret`, and
 2. Make an [expiry claim](https://tools.ietf.org/html/rfc7519#section-4.1.4).
 
 As this command is dependant on the `jwt_shared_secret`, the `RACK_ENV` must be set within your environment. By default the tokens will expire in 30 days. This can be optionally changed by specifying how long the token should be valid for in days.
+
+Users tokens have full access to the API. Currently admin tokens are not supported.
 
 ```
 # Set the rack environment

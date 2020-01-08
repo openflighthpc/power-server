@@ -4,14 +4,14 @@ Requires=network.target
 Wants=nodeattr-server.service
 
 [Service]
-Type=forking
+Type=simple
 User=root
 PIDFile=/opt/flight/opt/power-server/var/puma.pid
 Environment=PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/flight/bin
 EnvironmentFile=/opt/flight/etc/power-server.conf
 WorkingDirectory=/opt/flight/opt/power-server
 ExecStart=/bin/sh -c ' \
-  bin/puma -d -e production \
+  bin/puma -e production \
     --redirect-append \
     --redirect-stdout /opt/flight/log/power-server.log \
     --redirect-stderr /opt/flight/log/power-server.log \

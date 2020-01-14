@@ -1,6 +1,6 @@
 # Power Server
 
-Platform agnostic utility for preforming power commands across a HPC cluster
+Platform agnostic utility for performing power commands across a HPC cluster
 
 ## Overview
 
@@ -161,7 +161,7 @@ The `platform` is extracted from the `params` hash and therefore may not be set.
 
 The [provided systemd unit file](support/power-server.service) has been designed to integrate with the `OpenFlightHPC` [flight-runway](https://github.com/openflighthpc/flight-runway) package. The following preconditions must be satisfied for the unit file to work:
 1. `OpenFlightHPC` `flight-runway` must be installed,
-2. The server must be installed as `/otp/flight/opt/power-server`,
+2. The server must be installed as `/opt/flight/opt/power-server`,
 3. The log directory must exist: `/opt/flight/log`, and
 4. The configuration file must exist: `/opt/flight/etc/power-server.conf`.
 
@@ -231,8 +231,6 @@ If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
 ![Creative Commons License](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)
 
 Power Server is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
-
-Based on a work at [https://github.com/openflighthpc/openflight-tools](https://github.com/openflighthpc/openflight-tools).
 
 This content and the accompanying materials are made available available
 under the terms of the Creative Commons Attribution-ShareAlike 4.0

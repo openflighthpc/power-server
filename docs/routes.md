@@ -14,9 +14,9 @@ All requests must send the following header:
 Authorization: Bearer <token>
 ```
 
-## Routes
+## Main Routes
 
-All the requests MUST be made to the root URL `/`. The different types of requests are distinguished via the HTTP verbs: `get`, `patch`, `put`, and `delete`. Each request can be ran on multiple `nodes` and/or `groups` using the query parameters of the same names. 
+All the requests in this main routes section MUST be made to the root URL `/`. The different types of requests are distinguished via the HTTP verbs: `get`, `patch`, `put`, and `delete`. Each request can be ran on multiple `nodes` and/or `groups` using the query parameters of the same names. 
 
 The `nodes` query parameter MUST only be specified once within the request URL and SHOULD meet the following format. The format is described using POSIX extended regular expressions as described in [IEEE Std 1003.1-2017](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html#tag_09_03). The `groups` param uses the same regular expression and name expansion as the `nodes`.
 `^[:alnum:]+(\[[:digit:]+-[:digit:]+\])?(,[:alnum:]+(\[[:digit:]+-[:digit:]+\])?)*$`
@@ -56,9 +56,42 @@ FlightFacade::Facades::GroupFacade::Exploding.expand_names('node[1-2],node1')
 This makes the final URL for all requests, where `nodes` and `groups` params are optional:
 `/?nodes=<node-names>&&groups=<group-names>`
 
+All the responses SHOULD take the following format. Additional attributes MAY be added on a per route basis. The `type` MUST be `commands` and the `id` SHALL be the name of the associated node.
+
+The attribute definitions are as follows:
+* `action`: *DEPRECATED* The name of command type that was ran, it MAY be removed due to its redundancy
+* `node-name`: *DEPRECATED* The name of the associated node. It MUST be the same as `id`. It MAY be removed due to its redundancy
+* `platform`: *DEPRECATED* The type of the node the action ran on. It MAY be removed as it leaks node information#
+* `missing`: MUST be true if and only if the node is not known to the server. It SHOULD otherwise be false
+* `success`: MUST be true if and only if the command succeeded without error. It SHOULD otherwise be false
+
+The response SHOULD be `200 OK` even if `success` or `missing` is set to false. This is because all requests MAY preform actions over multiple nodes. The `200 OK` indicates the request was successfully received, processed, and responded to. Each command MUST be inspect individually to determine if it specifically succeeded.
+
+NOTE: Interpreting the `success` flag
+The server will run a script for each action that is defined via configuration. The `success` flag only indicates the script exited properly (or not). It does not check if the action was successfully preformed on the node. The action MAY be preformed asynchronously on the `node` and MAY error after a successful response has been issued.
+
+```
+{
+  "data": [{
+    "type":"commands",
+    "id":"<node-name>",
+    "attributes": {
+      "action": "<command-type>",
+      "node-name":"<node-name>",
+      "platform":"<platform>",
+      "missing": <true|false>,
+      "success": <true|false>
+    }
+  },
+  <additional-command-resource-object>,
+  ...
+  ]
+}
+```
+
 ### GET Power Status
 
-Returns a list of nodes with the power status.
+Returns a list of commands with the power status.
 
 ```
 GET /?nodes=<node-name>&&groups=<group-name>
@@ -86,7 +119,7 @@ Content-Type: application/json
 
 ### PATCH Power On
 
-Return a list of nodes which have been powered on.
+Return a list of commands which have been powered on.
 
 ```
 PATCH /?nodes=<node-name>&&groups=<group-name>
@@ -113,7 +146,7 @@ Content-Type: application/json
 
 ### PUT Reboot
 
-Return a list of nodes which have been rebooted.
+Return a list of commands which have been rebooted.
 
 ```
 PUT /?nodes=<node-name>&&groups=<group-name>
@@ -140,7 +173,7 @@ Content-Type: application/json
 
 ### DELETE Power Off
 
-Return a list of nodes which have been powered off.
+Return a list of commands which have been powered off.
 
 ```
 DELETE /?nodes=<node-name>&&groups=<group-name>

@@ -91,7 +91,7 @@ The server will run a script for each action that is defined via configuration. 
 
 ### GET Power Status
 
-Returns a list of commands with the power status.
+Returns a list of commands with the power status. The additional `running` status gives the power status and MUST only be considered valid if `success` is true. The `running` flag MUST be `true` if and only if the node is currently on otherwise it SHOULD be false.
 
 ```
 GET /?nodes=<node-name>&&groups=<group-name>

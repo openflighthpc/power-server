@@ -72,19 +72,20 @@ The server will run a script for each action that is defined via configuration. 
 
 ```
 {
-  "data": [{
-    "type":"commands",
-    "id":"<node-name>",
-    "attributes": {
-      "action": "<command-type>",
-      "node-name":"<node-name>",
-      "platform":"<platform>",
-      "missing": <true|false>,
-      "success": <true|false>
-    }
-  },
-  <additional-command-resource-object>,
-  ...
+  "data": [
+    {
+      "type": "commands",
+      "id": "<node-name>",
+      "attributes": {
+        "action": "<command-type>",
+        "node-name": "<node-name>",
+        "platform": "<platform>",
+        "missing": <true|false>,
+        "success": <true|false>
+      }
+    },
+    <additional-command-resource-object>,
+    ...
   ]
 }
 ```
@@ -101,18 +102,19 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "data": [{
-    "type":"commands",
-    "id":"<node-name>",
-    "attributes": {
-      "action": "status",
-      "node-name":"<node-name>",
-      "platform":"<platform>",
-      "missing": <true|false>,
-      "success": <true|false>,
-      "running": <true|false|null>
-    }
-  }, ...
+  "data": [
+    {
+      "type": "commands",
+      "id": "<node-name>",
+      "attributes": {
+        "action": "status",
+        "node-name": "<node-name>",
+        "platform": "<platform>",
+        "missing": <true|false>,
+        "success": <true|false>,
+        "running": <true|false|null>
+      }
+    }, ...
   ]
 }
 ```
@@ -129,17 +131,18 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "data": [{
-    "type":"commands",
-    "id":"<node-name>",
-    "attributes": {
-      "action": "power_on",
-      "node-name":"<node-name>",
-      "platform":"<platform>",
-      "missing": <true|false>,
-      "success": <true|false>
-    }
-  }, ...
+  "data": [
+    {
+      "type": "commands",
+      "id": "<node-name>",
+      "attributes": {
+        "action": "power_on",
+        "node-name": "<node-name>",
+        "platform": "<platform>",
+        "missing": <true|false>,
+        "success": <true|false>
+      }
+    }, ...
   ]
 }
 ```
@@ -156,17 +159,18 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "data": [{
-    "type":"commands",
-    "id":"<node-name>",
-    "attributes": {
-      "action": "reboot",
-      "node-name":"<node-name>",
-      "platform":"<platform>",
-      "missing": <true|false>,
-      "success": <true|false>
-    }
-  }, ...
+  "data": [
+    {
+      "type": "commands",
+      "id": "<node-name>",
+      "attributes": {
+        "action": "reboot",
+        "node-name": "<node-name>",
+        "platform": "<platform>",
+        "missing": <true|false>,
+        "success": <true|false>
+      }
+    }, ...
   ]
 }
 ```
@@ -183,17 +187,83 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "data": [{
-    "type":"commands",
-    "id":"<node-name>",
-    "attributes": {
-      "action": "power_off",
-      "node-name":"<node-name>",
-      "platform":"<platform>",
-      "missing": <true|false>,
-      "success": <true|false>
-    }
-  }, ...
+  "data": [
+    {
+      "type": "commands",
+      "id": "<node-name>",
+      "attributes": {
+        "action": "power_off",
+        "node-name": "<node-name>",
+        "platform": "<platform>",
+        "missing": <true|false>,
+        "success": <true|false>
+      }
+    }, ...
+  ]
+}
+```
+
+## Additional Routes
+
+These routes provide additional information such as node and group lists.
+
+### GET Node List
+
+
+Returns a list of `node` objects that the server knows about. The `id` MUST be the name of the node.
+
+DEPRECATION NOTICE: The `name` attribute SHOULD NOT be used as it MUST be the same as the `id`. It MAY be removed in future releases.
+
+```
+GET /nodes
+Authorization: Bearer <token>
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "data": [
+    {
+      "type": "nodes",
+      "id": "<node-name>",
+      "attributes": {
+        "name": "<node-name>"
+      }
+    },
+    <additional-node-resource-object>,
+    ...
+  ]
+}
+```
+
+### GET Group List
+
+
+Returns a list of `group` objects that the server knows about. The `id` MUST be the name of the group.
+
+The `nodes` attribute is a list of node names that are part of the group. The `nodes` attribute MAY be an empty list.
+
+DEPRECATION NOTICE: The `name` attribute SHOULD NOT be used as it MUST be the same as the `id`. It MAY be removed in future releases.
+
+```
+GET /groups
+Authorization: Bearer <token>
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "data": [
+    {
+      "type": "groups",
+      "id": "<group-name>",
+      "attributes": {
+        "name": "<group-name>",
+        "nodes": ["<node-name>", ...]
+      }
+    },
+    <additional-group-resource-object>,
+    ...
   ]
 }
 ```

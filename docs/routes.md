@@ -209,7 +209,6 @@ These routes provide additional information such as node and group lists.
 
 ### GET Node List
 
-
 Returns a list of `node` objects that the server knows about. The `id` MUST be the name of the node.
 
 DEPRECATION NOTICE: The `name` attribute SHOULD NOT be used as it MUST be the same as the `id`. It MAY be removed in future releases.
@@ -237,7 +236,6 @@ Content-Type: application/json
 ```
 
 ### GET Group List
-
 
 Returns a list of `group` objects that the server knows about. The `id` MUST be the name of the group.
 

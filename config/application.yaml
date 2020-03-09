@@ -22,8 +22,8 @@
 # Particular care should be taken not to hard set the `remote_jwt` in this
 # config for security reasons.
 remote_cluster: default
+remote_url: http://localhost:6301
 # remote_jwt:
-# remote_url: http://localhost:6301
 
 # DYNAMIC DEFAULTS:
 # The following may use relative paths from the install directory
@@ -36,7 +36,6 @@ num_worker_commands: '50'
 log_level: info
 
 development:
-  remote_url:       http://localhost:6301
   topology_config:  config/topology.example.yaml
   log_level: debug
 

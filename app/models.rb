@@ -40,7 +40,7 @@ class Topology < Hashie::Trash
 
       def cache
         @cache ||= Topology.new(SymbolizedMash.load(path)).tap do |top|
-          if Figaro.env.remote_url
+          if Figaro.env.remote_jwt
             top.dynamic_nodes_cluster = Figaro.env.remote_cluster
           end
         end

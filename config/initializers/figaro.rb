@@ -47,8 +47,8 @@ Figaro.require_keys(*['jwt_shared_secret',
                       'num_worker_commands',
                       'log_level',
                       *relative_keys].tap do |keys|
-                        if ENV['remote_url']
-                          keys << 'remote_jwt' << 'remote_cluster'
+                        if ENV['remote_jwt']
+                          keys << 'remote_url' << 'remote_cluster'
                         end
                       end)
 
